@@ -1,0 +1,3 @@
+[submodule "cxxd/cxxd"]
+	path = lib/cxxd
+	url = https://github.com/JBakamovic/cxxd.git
