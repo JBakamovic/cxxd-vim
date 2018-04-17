@@ -2,6 +2,7 @@
 * [Introduction](#introduction)
 * [Installation](#installation)
 * [Features](#features)
+* [Supported platforms](#supported-platforms)
 * [Configuration](#configuration)
 * [Colorschemes](#colorschemes)
 * [Usage](#usage)
@@ -39,7 +40,11 @@ If you're not using any of the plugin managers, you can simply clone the reposit
 
 # Features
 
-[Here](https://github.com/JBakamovic/cxxd/tree/remove_frontend_code#features)
+[Here](https://github.com/JBakamovic/cxxd/blob/master/README.md#features)
+
+# Supported platforms
+
+[Here](https://github.com/JBakamovic/cxxd/blob/master/README.md#supported-platforms)
 
 # Configuration
 For the best experience, your project root directory shall expose a configuration file which contains compiler flags being used for the build. It can be done with either of the following methods:
