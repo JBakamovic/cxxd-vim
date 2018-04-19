@@ -10,7 +10,23 @@ function! cxxd#services#source_code_model#semantic_syntax_highlight#run(filename
             let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
         endif
-        python cxxd.api.source_code_model_semantic_syntax_highlight_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'))
+
+        " We don't want to fire semantic syntax highlighting request on each
+        " CursorHold(I) event but only when viewport has been actually changed or
+        " if there were some modifications being done.
+        let l:current_visible_line_begin = line('w0')
+        let l:current_visible_line_end = line('w$')
+        if cxxd#utils#is_more_modifications_done(winnr())
+            python cxxd.api.source_code_model_semantic_syntax_highlight_request(
+\ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
+\ 	        )
+            call clearmatches()
+        elseif cxxd#utils#is_viewport_changed(winnr(), l:current_visible_line_begin, l:current_visible_line_end)
+            python cxxd.api.source_code_model_semantic_syntax_highlight_request(
+\ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
+\ 	        )
+            call clearmatches()
+        endif
     endif
 endfunction
 

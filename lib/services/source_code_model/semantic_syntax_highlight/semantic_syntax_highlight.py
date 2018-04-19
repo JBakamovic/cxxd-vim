@@ -49,11 +49,11 @@ class VimSemanticSyntaxHighlight:
 
         if success:
             # Unpack the parameters
-            tunit, traverse = args
+            tunit, line_begin, line_end, traverse = args
 
             # Build Vim syntax highlight rules
             vim_syntax_hl_patterns = set()
-            traverse(tunit, callback, vim_syntax_hl_patterns)
+            traverse(tunit, line_begin, line_end, callback, vim_syntax_hl_patterns)
 
             # Write Vim syntax file
             vim_syntax_file = open(self.output_syntax_file, "w", 0)

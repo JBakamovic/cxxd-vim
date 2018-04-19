@@ -94,6 +94,7 @@ augroup cxxd_init_deinit
     autocmd!
     autocmd VimEnter                *                                           call cxxd#server#start()
     autocmd VimLeave                *                                           call cxxd#server#stop()
+    autocmd VimEnter,WinEnter       *                                           call cxxd#utils#init_window_specific_vars()
 augroup END
 
 augroup cxxd_source_code_model_indexer
@@ -103,16 +104,13 @@ augroup END
 
 augroup cxxd_source_code_model_diagnostics
     autocmd!
-    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
-    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
+    autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
     autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
 augroup END
 
 augroup cxxd_source_code_model_semantic_syntax_highlight
     autocmd!
-    autocmd BufEnter                *                                           if index(['c', 'cpp'], &ft) < 0 | call clearmatches() | endif  " We need to clear matches when entering non-Cxx buffers
-    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
-    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
+    autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
     autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
 augroup END
 
@@ -120,7 +118,6 @@ augroup cxxd_clang_format
     autocmd!
     autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#clang_format#run(expand('%:p'))
 augroup END
-
 
 "
 " Cxxd commands
