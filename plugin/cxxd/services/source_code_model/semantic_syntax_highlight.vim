@@ -20,12 +20,10 @@ function! cxxd#services#source_code_model#semantic_syntax_highlight#run(filename
             python cxxd.api.source_code_model_semantic_syntax_highlight_request(
 \ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
 \ 	        )
-            call clearmatches()
         elseif cxxd#utils#is_viewport_changed(winnr(), l:current_visible_line_begin, l:current_visible_line_end)
             python cxxd.api.source_code_model_semantic_syntax_highlight_request(
 \ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
 \ 	        )
-            call clearmatches()
         endif
     endif
 endfunction
@@ -38,6 +36,9 @@ function! cxxd#services#source_code_model#semantic_syntax_highlight#run_callback
     if a:status == v:true
         let l:current_buffer = expand('%:p')
         if l:current_buffer == a:filename
+            " Clear all previously added matches
+            call clearmatches()
+
             " Apply the syntax highlighting rules
             execute('source ' . a:syntax_file)
 
