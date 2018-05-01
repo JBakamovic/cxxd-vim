@@ -57,6 +57,7 @@ let g:cxxd_src_code_model       = {
 \                                       'type_deduction'            : { 'enabled' : 1 },
 \                                       'go_to_definition'          : { 'enabled' : 1 },
 \                                       'go_to_include'             : { 'enabled' : 1 },
+\                                       'auto_completion'           : { 'enabled' : 1 },
 \                                   }
 \}
 

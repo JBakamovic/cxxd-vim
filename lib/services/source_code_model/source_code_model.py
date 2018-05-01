@@ -10,6 +10,7 @@ from diagnostics.diagnostics import VimDiagnostics
 from type_deduction.type_deduction import VimTypeDeduction
 from go_to_definition.go_to_definition import VimGoToDefinition
 from go_to_include.go_to_include import VimGoToInclude
+from auto_completion.auto_completion import VimAutoCompletion
 
 class VimSourceCodeModel(ServicePlugin):
     def __init__(self, servername):
@@ -20,6 +21,7 @@ class VimSourceCodeModel(ServicePlugin):
         self.type_deduction = VimTypeDeduction(self.servername)
         self.go_to_definition = VimGoToDefinition(self.servername)
         self.go_to_include = VimGoToInclude(self.servername)
+        self.auto_completion = VimAutoCompletion(self.servername)
 
     def startup_callback(self, success, payload, startup_payload):
         Utils.call_vim_remote_function(
@@ -49,5 +51,7 @@ class VimSourceCodeModel(ServicePlugin):
             self.go_to_definition(success, payload, args)
         elif source_code_model_service_id == SourceCodeModelSubServiceId.GO_TO_INCLUDE:
             self.go_to_include(success, payload, args)
+        elif source_code_model_service_id == SourceCodeModelSubServiceId.AUTO_COMPLETION:
+            self.auto_completion(success, payload, args)
         else:
             logging.error('Invalid source code model service id!')
