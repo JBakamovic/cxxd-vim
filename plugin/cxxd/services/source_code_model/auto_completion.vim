@@ -36,8 +36,7 @@ function! cxxd#services#source_code_model#auto_completion#run()
         let s:completions = []
         let l:line = line('.')
         let l:col  = col('.')
-        let l:expr_to_complete = expand('<cexpr>')
-        python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('l:expr_to_complete'), vim.eval('l:filename'), vim.eval('l:contents_filename'), vim.eval('l:line'), vim.eval('l:col'))
+        python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('l:filename'), vim.eval('l:contents_filename'), vim.eval('l:line'), vim.eval('l:col'))
     endif
 endfunction
 
