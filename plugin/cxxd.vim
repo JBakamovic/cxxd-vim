@@ -100,6 +100,11 @@ augroup cxxd_source_code_model_indexer
     autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#indexer#run_on_single_file(expand('%:p'))
 augroup END
 
+augroup cxxd_source_code_model_indexer
+    autocmd!
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#auto_completion#run()
+augroup END
+
 augroup cxxd_source_code_model_diagnostics
     autocmd!
     autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))

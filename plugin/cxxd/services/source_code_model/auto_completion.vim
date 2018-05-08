@@ -28,16 +28,18 @@ function! cxxd#services#source_code_model#auto_completion#run()
     let l:filename = expand('%:p')
     if g:cxxd_src_code_model['services']['auto_completion']['enabled']
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
+        let s:completions = []
         let l:contents_filename = l:filename
-        if getbufvar(l:filename, '&modified')
+        "if getbufvar(l:filename, '&modified')
+        if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = '/tmp/tmp_' . fnamemodify(l:filename, ':p:t')
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-        endif
 
-        let s:completions = []
-        let l:line = line('.')
-        let l:col  = col('.')
-        python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('l:filename'), vim.eval('l:contents_filename'), vim.eval('l:line'), vim.eval('l:col'))
+            let l:line = line('.')
+            let l:col  = col('.')
+            python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('l:filename'), vim.eval('l:contents_filename'), vim.eval('l:line'), vim.eval('l:col'))
+        endif
+        "endif
     endif
 endfunction
 
@@ -61,7 +63,7 @@ function! cxxd#services#source_code_model#auto_completion#run_callback(status, a
         echomsg 'Auto completion candidates: ' . a:auto_completion_candidates
         echomsg 'Type = ' . type(a:auto_completion_candidates)
         let s:completions = a:auto_completion_candidates
-        call s:SendKeys("\i\<C-X>\<C-U>\<C-P>")
+        call s:SendKeys("\<C-X>\<C-U>\<C-P>")
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (auto_completion) service. See Cxxd server log for more details!' | echohl None
     endif
