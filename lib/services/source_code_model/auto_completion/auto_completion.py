@@ -23,5 +23,5 @@ class VimAutoCompletion():
                 logging.info('{0}'.format(candidate))
             call_vim_rpc(success, candidate_list)
         else:
-            call_vim_rpc(success, ['no auto-completion'])
+            call_vim_rpc(success, [])
             logging.error('Something went wrong in auto-completion service ... Payload = {0}'.format(payload))
