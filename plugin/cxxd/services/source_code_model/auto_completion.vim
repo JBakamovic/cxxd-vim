@@ -60,8 +60,6 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#auto_completion#run_callback(status, auto_completion_candidates)
     if a:status == v:true
-        echomsg 'Auto completion candidates: ' . a:auto_completion_candidates
-        echomsg 'Type = ' . type(a:auto_completion_candidates)
         let s:completions = a:auto_completion_candidates
         call s:SendKeys("\<C-X>\<C-U>\<C-P>")
     else
