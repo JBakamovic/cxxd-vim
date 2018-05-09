@@ -23,21 +23,16 @@ endfunc
 " Function:     cxxd#services#source_code_model#auto_completion#run()
 " Description:  Triggers the source code auto_completion for current buffer.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"function! cxxd#services#source_code_model#auto_completion#run(filename, expr_to_complete)
-function! cxxd#services#source_code_model#auto_completion#run()
-    let l:filename = expand('%:p')
+function! cxxd#services#source_code_model#auto_completion#run(filename, line, column)
     if g:cxxd_src_code_model['services']['auto_completion']['enabled']
-        " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
         let s:completions = []
-        let l:contents_filename = l:filename
-        "if getbufvar(l:filename, '&modified')
+        " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
+        "let l:contents_filename = a:filename
+        "if getbufvar(a:filename, '&modified')
         if cxxd#utils#is_more_modifications_done(winnr())
-            let l:contents_filename = '/tmp/tmp_' . fnamemodify(l:filename, ':p:t')
+            let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-
-            let l:line = line('.')
-            let l:col  = col('.')
-            python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('l:filename'), vim.eval('l:contents_filename'), vim.eval('l:line'), vim.eval('l:col'))
+            python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'))
         endif
         "endif
     endif
