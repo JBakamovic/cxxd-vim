@@ -1,6 +1,4 @@
 set completefunc=cxxd#services#source_code_model#auto_completion#completefunc
-setlocal completeopt+=menuone,noinsert,noselect
-setlocal complete=
 let s:completions = []
 
 function! cxxd#services#source_code_model#auto_completion#completefunc(findstart, base)
@@ -57,6 +55,10 @@ endfunction
 function! cxxd#services#source_code_model#auto_completion#run_callback(status, auto_completion_candidates)
     if a:status == v:true
         let s:completions = a:auto_completion_candidates
+        setlocal completeopt-=menu
+        setlocal completeopt-=preview
+        setlocal completeopt+=menuone,noinsert,noselect
+        setlocal complete=
         call s:SendKeys("\<C-X>\<C-U>\<C-P>")
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (auto_completion) service. See Cxxd server log for more details!' | echohl None
