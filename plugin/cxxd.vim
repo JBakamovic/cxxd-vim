@@ -102,7 +102,7 @@ augroup END
 
 augroup cxxd_source_code_model_auto_completion
     autocmd!
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.') - 1)
     autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#auto_completion#reset()
 augroup END
 
