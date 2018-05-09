@@ -37,7 +37,7 @@ function! cxxd#services#source_code_model#auto_completion#run(filename, line, co
         if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-            python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'))
+            python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'), vim.eval('line2byte(a:line)'))
         endif
         "endif
     endif
