@@ -1,5 +1,6 @@
 set completefunc=cxxd#services#source_code_model#auto_completion#completefunc
 setlocal completeopt+=menuone,noinsert,noselect
+setlocal complete=
 let s:completions = []
 
 function! cxxd#services#source_code_model#auto_completion#completefunc(findstart, base)
