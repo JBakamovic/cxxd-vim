@@ -20,10 +20,6 @@ func! ListMonths()
   return ''
 endfunc
 
-function! cxxd#services#source_code_model#auto_completion#reset()
-    let s:completions = []
-endfunction
-
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#source_code_model#auto_completion#run()
 " Description:  Triggers the source code auto_completion for current buffer.
