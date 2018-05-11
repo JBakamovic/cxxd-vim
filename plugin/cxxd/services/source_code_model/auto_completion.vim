@@ -28,11 +28,10 @@ function! cxxd#services#source_code_model#auto_completion#run(filename, line, co
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
         "let l:contents_filename = a:filename
         "if getbufvar(a:filename, '&modified')
-        if cxxd#utils#is_more_modifications_done(winnr())
+        "if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-            python cxxd.api.source_code_model_auto_completion_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'), vim.eval('line2byte(a:line)'))
-        endif
+            python cxxd.api.source_code_model_auto_completion_code_complete_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'), vim.eval('line2byte(a:line)'))
         "endif
     endif
 endfunction
