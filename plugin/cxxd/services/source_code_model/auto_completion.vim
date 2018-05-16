@@ -8,31 +8,15 @@ function! cxxd#services#source_code_model#auto_completion#completefunc(findstart
     return s:completions
 endfunction
 
-"inoremap <F11> <C-R>=cxxd#services#source_code_model#auto_completion#run()<CR>
-"inoremap <F12> <C-R>=ListMonths()<CR>
-
-func! ListMonths()
-  call complete(col('.'), ['January', 'February', 'March',
-    \ 'April', 'May', 'June', 'July', 'August', 'September',
-    \ 'October', 'November', 'December'])
-  return ''
-endfunc
-
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#source_code_model#auto_completion#run()
-" Description:  Triggers the source code auto_completion for current buffer.
+" Description:  Triggers the source code auto_completion in (line, column) for given filename.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#auto_completion#run(filename, line, column)
     if g:cxxd_src_code_model['services']['auto_completion']['enabled']
-        let s:completions = []
-        " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
-        "let l:contents_filename = a:filename
-        "if getbufvar(a:filename, '&modified')
-        "if cxxd#utils#is_more_modifications_done(winnr())
-            let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
-            call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-            python cxxd.api.source_code_model_auto_completion_code_complete_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'), vim.eval('line2byte(a:line)'))
-        "endif
+        let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
+        call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
+        python cxxd.api.source_code_model_auto_completion_code_complete_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'), vim.eval('line2byte(a:line)'))
     endif
 endfunction
 
