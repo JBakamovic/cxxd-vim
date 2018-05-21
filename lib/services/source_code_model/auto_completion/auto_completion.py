@@ -1,5 +1,7 @@
 import logging
 from utils import Utils
+from cxxd.parser.ast_node_identifier import ASTNodeId
+from cxxd.parser.clang_parser import ClangParser
 
 class VimAutoCompletion():
     def __init__(self, servername):
@@ -20,15 +22,51 @@ class VimAutoCompletion():
                 params.append(chunk.spelling)
         return return_type, candidate, params
 
-    def _extract_result_kind(self, result):
-        # TODO Implement support for different kinds
-        # 'v' variable
-        # 'm' struct/class member
-        # 't' typedef
-        # 'd' define/macro
-        return 'f'
+    def _ast_node_id_to_vim_complete_item_kind(self, ast_node_id):
+        # Vim does not have support for all of the kinds we are able to identify with clang, so we do
+        # our best to map those remaining in the best category.
 
-    def __call__(self, success, payload, code_completion_result):
+        # 'v' variable
+        if ast_node_id in [\
+            ASTNodeId.getLocalVariableId(),
+            ASTNodeId.getFunctionParameterId(),
+            ASTNodeId.getTemplateTypeParameterId(),
+            ASTNodeId.getTemplateNonTypeParameterId(),
+            ASTNodeId.getTemplateTemplateParameterId()]:
+            return 'v'
+
+        # 'f' function or method
+        if ast_node_id in [\
+            ASTNodeId.getFunctionId(),
+            ASTNodeId.getMethodId()]:
+            return 'f'
+
+        # 'm' member of a struct or class
+        if ast_node_id in [\
+            ASTNodeId.getClassId(),
+            ASTNodeId.getStructId(),
+            ASTNodeId.getEnumId(),
+            ASTNodeId.getEnumValueId(),
+            ASTNodeId.getUnionId(),
+            ASTNodeId.getFieldId()]:
+            return 'm'
+
+        # 't' typedef
+        if ast_node_id in [\
+            ASTNodeId.getTypedefId()]:
+            return 't'
+
+        # 'd' #define or macro
+        if ast_node_id in [\
+            ASTNodeId.getMacroInstantiationId(),
+            ASTNodeId.getMacroDefinitionId()]:
+            return 'd'
+
+        # Otherwise we return an empty Vim kind
+        logging.error("Unable to map AST node id '{0}' to available Vim kinds!".format(ast_node_id))
+        return ''
+
+    def __call__(self, success, payload, code_completion_results):
         def call_vim_rpc(status, completion_candidates):
             Utils.call_vim_remote_function(
                 self.servername,
@@ -37,8 +75,8 @@ class VimAutoCompletion():
 
         if success:
             candidate_list = []
-            for result in code_completion_result:
-                kind = self._extract_result_kind(result)
+            for result in code_completion_results:
+                kind = self._ast_node_id_to_vim_complete_item_kind(ClangParser.to_ast_node_id(result.kind))
                 return_type, candidate, params = self._extract_chunks(result.string)
                 candidate_list.append(
                     self._create_vim_complete_item(
