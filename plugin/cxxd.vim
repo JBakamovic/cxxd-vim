@@ -136,16 +136,11 @@ augroup END
 :command                        CxxdFetchAllDiagnosticsBySeverityDesc :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc'])
 :command                        CxxdFetchAllDiagnosticsByAlphabet     :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['filename'])
 :command                        CxxdRebuildIndex                      :call cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
+:command                        CxxdAutoCompletion                    :call cxxd#services#source_code_model#auto_completion#run_i(expand('%:p'), line('.'), col('.'))
 :command                        CxxdAnalyzerClangTidyBuf              :call cxxd#services#clang_tidy#run(expand('%:p'), v:false)
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
 :command                        CxxdBuildRun                          :call cxxd#services#project_builder#run_target()
 :command -nargs=+               CxxdBuildRunWithParams                :call cxxd#services#project_builder#run_custom(<f-args>)
-
-"
-" TODO
-"       add license on top
-"       add license file?
-"
 
 "
 " Cxxd default-provided key mappings
@@ -162,6 +157,7 @@ nmap <unique>       <C-\>s     :CxxdFindAllReferences<CR>                       
 imap <unique>       <C-\>s     <ESC>:CxxdFindAllReferences<CR>i
 nmap <unique>       <C-\>d     :CxxdFetchAllDiagnosticsBySeverityDesc<CR>       | " Fetch all diagnostics sorted by severity descending
 imap <unique>       <C-\>d     <ESC>:CxxdFetchAllDiagnosticsBySeverityDesc<CR>i
+imap <unique>       <C-space>  <ESC>:CxxdAutoCompletion<CR>a                    | " Trigger auto-completion
 nmap <unique>       <C-\>r     :CxxdRebuildIndex<CR>                            | " Rebuild symbol database index for current project
 imap <unique>       <C-\>r     <ESC>:CxxdRebuildIndex<CR>i
 nmap <unique>       <F5>       :CxxdAnalyzerClangTidyBuf<CR>                    | " Run clang-tidy over current buffer (do not apply fixes)
