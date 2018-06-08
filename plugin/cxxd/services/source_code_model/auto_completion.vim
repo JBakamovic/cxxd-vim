@@ -52,7 +52,9 @@ function! cxxd#services#source_code_model#auto_completion#run_callback(status, a
         setlocal completeopt-=preview
         setlocal completeopt+=menuone,noinsert,noselect
         setlocal complete=
-        call s:SendKeys("\<C-X>\<C-U>\<C-P>")
+        if !empty(s:completions)
+            call s:SendKeys("\<C-X>\<C-U>\<C-P>")
+        endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (auto_completion) service. See Cxxd server log for more details!' | echohl None
     endif
