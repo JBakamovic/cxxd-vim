@@ -20,7 +20,7 @@ function! cxxd#services#source_code_model#semantic_syntax_highlight#run(filename
             python cxxd.api.source_code_model_semantic_syntax_highlight_request(
 \ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
 \ 	        )
-        elseif cxxd#utils#is_viewport_changed(winnr(), l:current_visible_line_begin, l:current_visible_line_end)
+        elseif cxxd#utils#is_viewport_changed(winnr())
             python cxxd.api.source_code_model_semantic_syntax_highlight_request(
 \ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
 \ 	        )

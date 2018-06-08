@@ -16,9 +16,11 @@ endfunction
 "               some inexisting events in Vim (e.g. 'ViewportChanged').
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#init_window_specific_vars()
-    if !exists('w:previous_num_of_changes')     | let w:previous_num_of_changes     = 0 | endif
-    if !exists('w:previous_visible_line_begin') | let w:previous_visible_line_begin = 0 | endif
-    if !exists('w:previous_visible_line_end')   | let w:previous_visible_line_end   = 0 | endif
+    if !exists('w:previous_num_of_changes')     | let w:previous_num_of_changes     = 0       | endif
+    if !exists('w:previous_visible_line_begin') | let w:previous_visible_line_begin = 0       | endif
+    if !exists('w:previous_visible_line_end')   | let w:previous_visible_line_end   = 0       | endif
+    if !exists('w:more_modifications_done')     | let w:more_modifications_done     = v:false | endif
+    if !exists('w:viewport_changed')            | let w:viewport_changed            = v:false | endif
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -26,20 +28,36 @@ endfunction
 " Description:  Check if more modifications has been done in given window.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#is_more_modifications_done(winnr)
-    let l:previous_num_of_changes = getwinvar(a:winnr, 'previous_num_of_changes')
-    let l:num_of_changes          = getbufinfo(winbufnr(a:winnr))[0].changedtick
-    if l:num_of_changes > l:previous_num_of_changes
-        call setwinvar(a:winnr, 'previous_num_of_changes', l:num_of_changes)
-        return v:true
-    endif
-    return v:false
+    return getwinvar(a:winnr, 'more_modifications_done')
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#utils#is_viewport_changed
 " Description:  Check if viewport has been changed for given window.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#utils#is_viewport_changed(winnr, current_visible_line_begin, current_visible_line_end)
+function! cxxd#utils#is_viewport_changed(winnr)
+    return getwinvar(a:winnr, 'viewport_changed')
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#utils#modifications_handler
+" Description:  Handler which checks if more modifications has been done in given window and accordingly set relevant variables.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#utils#modifications_handler(winnr)
+    let l:previous_num_of_changes = getwinvar(a:winnr, 'previous_num_of_changes')
+    let l:num_of_changes          = getbufinfo(winbufnr(a:winnr))[0].changedtick
+    let l:more_modifications_done = l:num_of_changes > l:previous_num_of_changes
+    if l:more_modifications_done
+        call setwinvar(a:winnr, 'previous_num_of_changes', l:num_of_changes)
+    endif
+    call setwinvar(a:winnr, 'more_modifications_done', l:more_modifications_done)
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#utils#viewport_handler
+" Description:  Handler which checks if viewport has been changed for given window and accordingly set relevant variables.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#utils#viewport_handler(winnr, current_visible_line_begin, current_visible_line_end)
     let l:previous_visible_line_begin = getwinvar(a:winnr, 'previous_visible_line_begin')
     let l:previous_visible_line_end   = getwinvar(a:winnr, 'previous_visible_line_end')
 
@@ -63,13 +81,13 @@ function! cxxd#utils#is_viewport_changed(winnr, current_visible_line_begin, curr
 	" 	   	  has been changed
 	let l:viewport_changed = v:false
 	if a:current_visible_line_begin != l:previous_visible_line_begin
-        call setwinvar(winnr(), 'previous_visible_line_begin', a:current_visible_line_begin)
+        call setwinvar(a:winnr, 'previous_visible_line_begin', a:current_visible_line_begin)
 		let l:viewport_changed = v:true
 	endif
 	if a:current_visible_line_end != l:previous_visible_line_end
-        call setwinvar(winnr(), 'previous_visible_line_end', a:current_visible_line_end)
+        call setwinvar(a:winnr, 'previous_visible_line_end', a:current_visible_line_end)
 		let l:viewport_changed = v:true
 	endif
-	return l:viewport_changed
+    call setwinvar(a:winnr, 'viewport_changed', l:viewport_changed)
 endfunction
 
