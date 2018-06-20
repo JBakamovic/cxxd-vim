@@ -1,6 +1,10 @@
 set completefunc=cxxd#services#source_code_model#auto_completion#completefunc
 let s:completions = []
 
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#auto_completion#completefunc()
+" Description:  Our (user-defined) Vim completion function.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#auto_completion#completefunc(findstart, base)
     if a:findstart
         return col('.')
@@ -10,7 +14,7 @@ endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#source_code_model#auto_completion#run()
-" Description:  Triggers the source code auto_completion in (line, column) for given filename.
+" Description:  On TextChangedI event we trigger source code auto_completion in (line, column) for given filename.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#auto_completion#run_i(filename, line, column)
     if g:cxxd_src_code_model['services']['auto_completion']['enabled']
@@ -20,8 +24,14 @@ function! cxxd#services#source_code_model#auto_completion#run_i(filename, line, 
     endif
 endfunction
 
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#auto_completion#run_p()
+" Description:  On TextChangedP event we trigger source code auto_completion in (line, column) for given filename.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#auto_completion#run_p(filename, line, column)
     if g:cxxd_src_code_model['services']['auto_completion']['enabled']
+        " This saves us from triggering the auto-complete engine twice in a row when there are no actual modifications being done.
+        " E.g. TextChangedP gets triggered just after the TextChangedI on the same character. It's redundant to react on both events.
         if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
