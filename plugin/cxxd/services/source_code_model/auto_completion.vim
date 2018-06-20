@@ -37,9 +37,7 @@ endfunction
 function! cxxd#services#source_code_model#auto_completion#run_callback(status, auto_completion_candidates)
     if a:status == v:true
         let s:completions = a:auto_completion_candidates
-        setlocal completeopt-=menu
-        setlocal completeopt-=preview
-        setlocal completeopt+=menuone,noinsert,noselect
+        setlocal completeopt=menuone,noinsert,noselect
         setlocal complete=
         if !empty(s:completions)
             call complete(col('.'), s:completions)
