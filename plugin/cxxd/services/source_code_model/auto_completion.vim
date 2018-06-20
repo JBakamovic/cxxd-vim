@@ -30,17 +30,6 @@ function! cxxd#services#source_code_model#auto_completion#run_p(filename, line, 
     endif
 endfunction
 
-function! s:SendKeys(keys)
-  " By default keys are added to the end of the typeahead buffer. If there are
-  " already keys in the buffer, they will be processed first and may change the
-  " state that our keys combination was sent for (e.g. <C-X><C-U><C-P> in normal
-  " mode instead of insert mode or <C-e> outside of completion mode). We avoid
-  " that by inserting the keys at the start of the typeahead buffer with the 'i'
-  " option. Also, we don't want the keys to be remapped to something else so we
-  " add the 'n' option.
-  call feedkeys(a:keys, 'in')
-endfunction
-
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#source_code_model#auto_completion#run_callback()
 " Description:  Populates the quickfix window with source code auto_completion.
@@ -53,7 +42,7 @@ function! cxxd#services#source_code_model#auto_completion#run_callback(status, a
         setlocal completeopt+=menuone,noinsert,noselect
         setlocal complete=
         if !empty(s:completions)
-            call s:SendKeys("\<C-X>\<C-U>\<C-P>")
+            call complete(col('.'), s:completions)
         endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (auto_completion) service. See Cxxd server log for more details!' | echohl None
