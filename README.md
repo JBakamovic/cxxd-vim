@@ -1,9 +1,14 @@
 # Contents
 * [Introduction](#introduction)
 * [Installation](#installation)
+  * [Dependencies](#dependencies)
+  * [Plugin managers](#plugin-managers)
+  * [Manual](#manual)
 * [Features](#features)
 * [Supported platforms](#supported-platforms)
 * [Configuration](#configuration)
+  * [JSON Compilation Database](#json-compilation-database)
+  * [Plain txt file](#plain-txt-file)
 * [Colorschemes](#colorschemes)
 * [Usage](#usage)
 * [Screenshots](#screenshots)
@@ -16,6 +21,9 @@ This is a Vim frontend for [cxxd](https://github.com/JBakamovic/cxxd) server.
 # Installation
 
 Any of your preferred way of installing Vim plugins should be fine. Please note the necessity for recursive clone. For example:
+
+## Dependencies
+[Here](https://github.com/JBakamovic/cxxd#dependencies).
 
 ## Plugin managers
 
@@ -32,7 +40,7 @@ Add the following to your `.vimrc`
 * `Plugin 'JBakamovic/cxxd-vim'`
 * `Plugin 'JBakamovic/yaflandia'` (accompanying colorscheme)
 
-## Manually
+## Manual
 
 If you're not using any of the plugin managers, you can simply clone the repository into your `~/.vim/` directory:
 * `$ git clone --recursive https://github.com/JBakamovic/cxxd-vim.git ~/.vim/cxxd-vim`
