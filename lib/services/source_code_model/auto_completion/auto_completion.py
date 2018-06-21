@@ -80,7 +80,7 @@ class VimAutoCompletion():
                 return_type, candidate, params = self._extract_chunks(result.string)
                 candidate_list.append(
                     self._create_vim_complete_item(
-                        candidate + ' (' + ', '.join(params) + ')' if kind == 'f' else candidate,
+                        candidate + '(' + ', '.join(params) + ')' if kind == 'f' else candidate,
                         kind,
                         return_type
                     )
