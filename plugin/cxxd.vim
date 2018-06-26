@@ -28,6 +28,18 @@ let g:loaded_cxxdvim = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
+"
+" Cxxd auto-completion sorting strategies
+"   Auto-completion candidates may be sorted with different strategies:
+"       (1) By priority (which is given & deduced by Clang auto-completion engine).
+"       (2) By symbol kind (same symbol kinds will be grouped together; e.g. functions, variables, methods, etc.).
+"       (3) Alphabetically.
+"
+let g:cxxd_auto_completion_sorting_strategies = {
+\                                                   'priority'  : 0,
+\                                                   'kind'      : 1,
+\                                                   'alphabet'  : 2,
+\}
 
 "
 " Cxxd fetch-all-diagnostics sorting strategies
@@ -57,7 +69,10 @@ let g:cxxd_src_code_model       = {
 \                                       'type_deduction'            : { 'enabled' : 1 },
 \                                       'go_to_definition'          : { 'enabled' : 1 },
 \                                       'go_to_include'             : { 'enabled' : 1 },
-\                                       'auto_completion'           : { 'enabled' : 1 },
+\                                       'auto_completion'           : {
+\                                                                       'enabled' : 1,
+\                                                                       'sorting_strategy' : g:cxxd_auto_completion_sorting_strategies['priority'],
+\                                       }
 \                                   }
 \}
 

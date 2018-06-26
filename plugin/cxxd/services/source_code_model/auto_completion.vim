@@ -20,7 +20,15 @@ function! cxxd#services#source_code_model#auto_completion#run_i(filename, line, 
     if g:cxxd_src_code_model['services']['auto_completion']['enabled']
         let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
         call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-        python cxxd.api.source_code_model_auto_completion_code_complete_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'), vim.eval('line2byte(a:line)'))
+        python cxxd.api.source_code_model_auto_completion_code_complete_request(
+\           server_handle,
+\           vim.eval('a:filename'),
+\           vim.eval('l:contents_filename'),
+\           vim.eval('a:line'),
+\           vim.eval('a:column'),
+\           vim.eval('line2byte(a:line)'),
+\           vim.eval("g:cxxd_src_code_model['services']['auto_completion']['sorting_strategy']")
+\       )
     endif
 endfunction
 
@@ -35,7 +43,15 @@ function! cxxd#services#source_code_model#auto_completion#run_p(filename, line, 
         if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-            python cxxd.api.source_code_model_auto_completion_code_complete_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('a:line'), vim.eval('a:column'), vim.eval('line2byte(a:line)'))
+            python cxxd.api.source_code_model_auto_completion_code_complete_request(
+\               server_handle,
+\               vim.eval('a:filename'),
+\               vim.eval('l:contents_filename'),
+\               vim.eval('a:line'),
+\               vim.eval('a:column'),
+\               vim.eval('line2byte(a:line)'),
+\               vim.eval("g:cxxd_src_code_model['services']['auto_completion']['sorting_strategy']")
+\       )
         endif
     endif
 endfunction
