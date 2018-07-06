@@ -91,3 +91,27 @@ function! cxxd#utils#viewport_handler(winnr, current_visible_line_begin, current
     call setwinvar(a:winnr, 'viewport_changed', l:viewport_changed)
 endfunction
 
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#utils#last_occurence_of_non_identifier
+" Description:  Find.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#utils#last_occurence_of_non_identifier(str)
+    let l:idx = -1
+python << EOF
+import vim
+def is_identifier(char):
+    is_digit = char.isdigit()
+    is_alpha = char.isalpha()
+    is_underscore = char == '_'
+    return is_digit or is_alpha or is_underscore
+
+string = vim.eval('a:str')
+vim.command('let l:idx = %s' % str(-1))
+for idx, char in enumerate(string[::-1]):
+    if not is_identifier(char):
+        vim.command('let l:idx = %s' % str(idx))
+        break
+EOF
+    return l:idx
+endfunction
+

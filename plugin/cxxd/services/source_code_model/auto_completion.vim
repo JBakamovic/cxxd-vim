@@ -7,7 +7,8 @@ let s:completions = []
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#auto_completion#completefunc(findstart, base)
     if a:findstart
-        return col('.')
+        let l:start = col('.') - len(expand('<cword>'))
+        return l:start
     endif
     return s:completions
 endfunction
@@ -66,7 +67,15 @@ function! cxxd#services#source_code_model#auto_completion#run_callback(status, a
         setlocal completeopt=menuone,noinsert,noselect
         setlocal complete=
         if !empty(s:completions)
-            call complete(col('.'), s:completions)
+            let l:line = getline('.')
+            let l:idx = cxxd#utils#last_occurence_of_non_identifier(getline('.')[0:(col('.')+1)])
+            if l:idx == -1
+                let l:start_completion_col = 0
+            else
+                let l:start_completion_col = col('.') - l:idx
+            endif
+            "echomsg 'Start: ' . l:idx . ' Current col: ' . col('.') . ' Current word: ' . l:line[(col('.')-1-l:idx):col('.')+1]
+            call complete(l:start_completion_col, s:completions)
         endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (auto_completion) service. See Cxxd server log for more details!' | echohl None
