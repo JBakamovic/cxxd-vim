@@ -1,18 +1,3 @@
-set completefunc=cxxd#services#source_code_model#auto_completion#completefunc
-let s:completions = []
-
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Function:     cxxd#services#source_code_model#auto_completion#completefunc()
-" Description:  Our (user-defined) Vim completion function.
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#source_code_model#auto_completion#completefunc(findstart, base)
-    if a:findstart
-        let l:start = col('.') - len(expand('<cword>'))
-        return l:start
-    endif
-    return s:completions
-endfunction
-
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#source_code_model#auto_completion#run()
 " Description:  On TextChangedI event we trigger source code auto_completion in (line, column) for given filename.
@@ -63,10 +48,9 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#auto_completion#run_callback(status, auto_completion_candidates)
     if a:status == v:true
-        let s:completions = a:auto_completion_candidates
         setlocal completeopt=menuone,noinsert,noselect
         setlocal complete=
-        if !empty(s:completions)
+        if !empty(a:auto_completion_candidates)
             let l:line = getline('.')
             let l:idx = cxxd#utils#last_occurence_of_non_identifier(getline('.')[0:(col('.')+1)])
             if l:idx == -1
@@ -74,12 +58,10 @@ function! cxxd#services#source_code_model#auto_completion#run_callback(status, a
             else
                 let l:start_completion_col = col('.') - l:idx
             endif
-            "echomsg 'Start: ' . l:idx . ' Current col: ' . col('.') . ' Current word: ' . l:line[(col('.')-1-l:idx):col('.')+1]
-            call complete(l:start_completion_col, s:completions)
+            call complete(l:start_completion_col, a:auto_completion_candidates)
         endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (auto_completion) service. See Cxxd server log for more details!' | echohl None
     endif
-    return ''
 endfunction
 
