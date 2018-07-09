@@ -26,6 +26,12 @@ class VimAutoCompletion():
         # Vim does not have support for all of the kinds we are able to identify with clang, so we do
         # our best to map those remaining in the best category.
 
+        # 'n' namespace (NOTE: not really supported according to :help complete-items but shows up nicely in pum)
+        if ast_node_id in [\
+            ASTNodeId.getNamespaceId(),
+            ASTNodeId.getNamespaceAliasId()]:
+            return 'n'
+
         # 'v' variable
         if ast_node_id in [\
             ASTNodeId.getLocalVariableId(),
