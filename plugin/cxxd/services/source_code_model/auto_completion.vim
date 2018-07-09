@@ -44,14 +44,13 @@ endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#source_code_model#auto_completion#run_callback()
-" Description:  Populates the quickfix window with source code auto_completion.
+" Description:  Opens up the pop-up menu populated with candidate list.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#auto_completion#run_callback(status, auto_completion_candidates)
     if a:status == v:true
         setlocal completeopt=menuone,noinsert,noselect
         setlocal complete=
         if !empty(a:auto_completion_candidates)
-            let l:line = getline('.')
             let l:idx = cxxd#utils#last_occurence_of_non_identifier(getline('.')[0:(col('.')+1)])
             if l:idx == -1
                 let l:start_completion_col = 0
