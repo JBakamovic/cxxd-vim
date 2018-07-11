@@ -7,20 +7,30 @@ class VimAutoCompletion():
     def __init__(self, servername):
         self.servername = servername
 
-    def _create_vim_complete_item(self, candidate, kind, return_type = None, extra_documentation = None):
-        return {'word' : candidate, 'kind' : kind, 'menu' : return_type if return_type else '', 'info' : extra_documentation if extra_documentation is not None else ''}
+    def _create_vim_complete_item(self, candidate, detailed_candidate, kind, result_type, extra_documentation = None):
+        return {
+            'word' : candidate,             # On item selection, insert shortened form of the candidate (e.g. function without parameters)
+            'abbr' : detailed_candidate,    # But still show detailed information about the candidate when available (e.g. function arguments)
+            'kind' : kind,
+            'menu' : result_type if result_type else '',
+            'info' : extra_documentation if extra_documentation else '',
+            'dup'  : 1,                     # Function overloads, e.g. push_back(const value_type&&) and push_back(value_type&&),
+                                            # will result in 'word' duplicates (e.g. multiple push_back's).
+                                            # As duplicate 'word's will not be added by default, we must set this
+                                            # property in order to preserve all of the overloads in the list.
+        }
 
     def _extract_chunks(self, completion_string):
         # TODO handle isKindOptional, isKindInformative and others which make sense
-        return_type, candidate, params = None, None, []
+        result_type, candidate, params = None, None, []
         for chunk in completion_string:
             if chunk.isKindTypedText():
                 candidate = chunk.spelling
             elif chunk.isKindResultType():
-                return_type = chunk.spelling
+                result_type = chunk.spelling
             elif chunk.isKindPlaceHolder():
                 params.append(chunk.spelling)
-        return return_type, candidate, params
+        return result_type, candidate, params
 
     def _ast_node_id_to_vim_complete_item_kind(self, ast_node_id):
         # Vim does not have support for all of the kinds we are able to identify with clang, so we do
@@ -83,12 +93,13 @@ class VimAutoCompletion():
             candidate_list = []
             for result in code_completion_results:
                 kind = self._ast_node_id_to_vim_complete_item_kind(ClangParser.to_ast_node_id(result.kind))
-                return_type, candidate, params = self._extract_chunks(result.string)
+                result_type, candidate, params = self._extract_chunks(result.string)
                 candidate_list.append(
                     self._create_vim_complete_item(
+                        candidate + '(' + ')' if kind == 'f' else candidate,
                         candidate + '(' + ', '.join(params) + ')' if kind == 'f' else candidate,
                         kind,
-                        return_type
+                        result_type
                     )
                 )
             call_vim_rpc(success, candidate_list)
