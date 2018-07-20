@@ -27,7 +27,7 @@ class VimDiagnostics():
                 return 'other'
             return '0'
 
-        def diag_callback(line, column, spelling, severity, category_number, category_name, fixits_iterator, diagnostics):
+        def diag_callback(filename, line, column, spelling, severity, category_number, category_name, fixits_iterator, diagnostics):
             def fixits_callback(range, value, fixit_hint):
                 fixit_hint.append(
                     "Try using '" + str(value) + "' instead (col" + str(range.start.column) + " -> col" + str(range.end.column) + ")"
@@ -36,7 +36,7 @@ class VimDiagnostics():
 
             fixit_hint = []
             diagnostics.append(
-                "{'filename': '" + str(payload[1]) + "', " +
+                "{'filename': '" + str(filename) + "', " +
                 "'lnum': '" + str(line) + "', " +
                 "'col': '" + str(column) + "', " +
                 "'type': '" + clang_severity_to_quickfix_type(severity) + "', " +
@@ -44,7 +44,7 @@ class VimDiagnostics():
             )
             fixit_visitor(fixits_iterator, fixits_callback, fixit_hint)
             diagnostics.append(
-                "{'filename': '" + str(payload[1]) + "', " +
+                "{'filename': '" + str(filename) + "', " +
                 "'lnum': '" + str(line) + "', " +
                 "'col': '" + str(column) + "', " +
                 "'type': 'I', " +
