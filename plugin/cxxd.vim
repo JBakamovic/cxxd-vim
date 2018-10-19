@@ -30,6 +30,21 @@ set cpo&vim
 
 
 "
+" Cxxd fetch-all-diagnostics sorting strategies
+"   Reported diagnostics may be sorted with different strategies:
+"       (1) No sorting.
+"       (2) By diagnostics severity (ascending order).
+"       (3) By diagnostics severity (descending order).
+"       (4) Alphabetically by filenames.
+"
+let g:cxxd_fetch_all_diagnostics_sorting_strategies = {
+\                                                   'none'          : 0,
+\                                                   'severity_asc'  : 1,
+\                                                   'severity_desc' : 2,
+\                                                   'filename'      : 3,
+\}
+
+"
 " Cxxd services definition
 "
 let g:cxxd_src_code_model       = {
@@ -137,6 +152,10 @@ augroup END
 :command                        CxxdGoToInclude                       :call cxxd#services#source_code_model#go_to_include#run(expand('%:p'), line('.'))
 :command                        CxxdGoToDefinition                    :call cxxd#services#source_code_model#go_to_definition#run(expand('%:p'), line('.'), col('.'))
 :command                        CxxdFindAllReferences                 :call cxxd#services#source_code_model#indexer#find_all_references(expand('%:p'), line('.'), col('.'))
+:command                        CxxdFetchAllDiagnostics               :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['none'])
+:command                        CxxdFetchAllDiagnosticsBySeverityAsc  :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_asc'])
+:command                        CxxdFetchAllDiagnosticsBySeverityDesc :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc'])
+:command                        CxxdFetchAllDiagnosticsByAlphabet     :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['filename'])
 :command                        CxxdRebuildIndex                      :call cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
 :command                        CxxdAnalyzerClangTidyBuf              :call cxxd#services#clang_tidy#run(expand('%:p'), v:false)
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
@@ -161,6 +180,8 @@ nmap <unique>       <S-F12>    :vsp <CR>:CxxdGoToDefinition<CR>                 
 imap <unique>       <S-F12>    <ESC>:vsp <CR>:CxxdGoToDefinition<CR>i
 nmap <unique>       <C-\>s     :CxxdFindAllReferences<CR>                       | " Find all references of symbol under the cursor
 imap <unique>       <C-\>s     <ESC>:CxxdFindAllReferences<CR>i
+nmap <unique>       <C-\>d     :CxxdFetchAllDiagnosticsBySeverityDesc<CR>       | " Fetch all diagnostics sorted by severity descending
+imap <unique>       <C-\>d     <ESC>:CxxdFetchAllDiagnosticsBySeverityDesc<CR>i
 nmap <unique>       <C-\>r     :CxxdRebuildIndex<CR>                            | " Rebuild symbol database index for current project
 imap <unique>       <C-\>r     <ESC>:CxxdRebuildIndex<CR>i
 nmap <unique>       <F5>       :CxxdAnalyzerClangTidyBuf<CR>                    | " Run clang-tidy over current buffer (do not apply fixes)

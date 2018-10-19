@@ -9,22 +9,20 @@ class VimDiagnostics():
         def clang_severity_to_quickfix_type(severity):
             # Clang severity | Vim Quickfix type
             # ----------------------------------
-            #   Ignored = 0     0 ()
+            #   Ignored = 0     I (info)
             #   Note    = 1     I (info)
             #   Warning = 2     W (warning)
             #   Error   = 3     E (error)
-            #   Fatal   = 4     other ()
+            #   Fatal   = 4     E (error)
             # ----------------------------------
             if severity == 0:
-                return '0'
+                return 'I'
             elif severity == 1:
                 return 'I'
             elif severity == 2:
                 return 'W'
-            elif severity == 3:
+            elif severity >= 3:
                 return 'E'
-            elif severity == 4:
-                return 'other'
             return '0'
 
         def diag_callback(filename, line, column, spelling, severity, category_number, category_name, fixits_iterator, diagnostics):

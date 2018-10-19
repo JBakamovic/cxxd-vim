@@ -42,6 +42,7 @@ endfunction
 function! cxxd#services#source_code_model#indexer#run_on_directory_callback(status)
     if a:status == v:true
         echomsg 'Indexing successfully completed.'
+        call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc'])
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-run-on-directory) service. See Cxxd server log for more details!' | echohl None
     endif
@@ -125,6 +126,42 @@ EOF
         redraw
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-find-all-references) service. See Cxxd server log for more details!' | echohl None
+    endif
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#indexer#fetch_all_diagnostics()
+" Description:  Fetches all of the source code issues/diagnostics.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#services#source_code_model#indexer#fetch_all_diagnostics(fetch_sorting_strategy)
+    if g:cxxd_src_code_model['services']['indexer']['enabled']
+        python cxxd.api.source_code_model_indexer_fetch_all_diagnostics_request(
+\           server_handle,
+\           vim.eval("a:fetch_sorting_strategy")
+\       )
+    endif
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback()
+" Description:  Diagnostics.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback(status, diagnostics)
+    if a:status == v:true
+        if len(a:diagnostics)
+            echohl WarningMsg | echomsg 'Some issues during source code indexing were found. For better experience, please inspect those in QuickFix window.' | echohl None
+        else
+            echohl MoreMsg | echomsg 'Kewl. No issues were found with the code.' | echohl None
+        endif
+python << EOF
+import vim
+with open(vim.eval('a:diagnostics'), 'r') as f:
+    vim.eval("setqflist([" + f.read() + "], 'r')")
+EOF
+        execute('copen')
+        redraw
+    else
+        echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-fetch-all-diagnostics) service. See Cxxd server log for more details!' | echohl None
     endif
 endfunction
 
