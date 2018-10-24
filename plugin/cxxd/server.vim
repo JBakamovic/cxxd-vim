@@ -61,6 +61,8 @@ function! cxxd#server#start_all_services(project_root_directory)
         call input('Press <Enter> to continue')
     endif
 
+    echohl MoreMsg | echomsg 'Compilation database detected at: ' . l:compilation_db_path | echohl None
+
     call cxxd#services#source_code_model#start(a:project_root_directory, l:compilation_db_path)
     call cxxd#services#clang_tidy#start(l:compilation_db_path)
     call cxxd#services#clang_format#start(l:clang_format_config_file)
@@ -83,15 +85,16 @@ endfunction
 " Description:  Discovers compilation database, if any.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#server#discover_compilation_db(project_root_directory)
-    let l:compilation_db_json = a:project_root_directory . '/' . g:cxxd_supported_comp_db['json']['name']
-    let l:compilation_db_txt  = a:project_root_directory . '/' . g:cxxd_supported_comp_db['txt']['name']
+    for path in g:cxxd_compilation_db_discovery_dir_paths
+        let l:compilation_db_json = a:project_root_directory . '/' . path . '/' . g:cxxd_supported_comp_db['json']['name']
+        let l:compilation_db_txt  = a:project_root_directory . '/' . path . '/' . g:cxxd_supported_comp_db['txt']['name']
 
-    if filereadable(l:compilation_db_json)
-        return l:compilation_db_json
-    elseif filereadable(l:compilation_db_txt)
-        return l:compilation_db_txt
-    else
-        return ''
-    endif
+        if filereadable(l:compilation_db_json)
+            return l:compilation_db_json
+        elseif filereadable(l:compilation_db_txt)
+            return l:compilation_db_txt
+        endif
+    endfor
+    return ''
 endfunction
 

@@ -62,6 +62,16 @@ let g:cxxd_clang_tidy           = {
 \                                   'config'  : '.clang-tidy'
 \}
 
+let g:cxxd_compilation_db_discovery_dir_paths = [
+\                                   '.',
+\                                   'build',
+\                                   'build_cmake',
+\                                   'cmake_build',
+\                                   '../build',
+\                                   '../build_cmake',
+\                                   '../cmake_build'
+\]
+
 let g:cxxd_compilation_db_json  = {
 \                                   'id'          : 1,
 \                                   'name'        : 'compile_commands.json',
