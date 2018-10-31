@@ -93,15 +93,19 @@ class VimAutoCompletion():
             candidate_list = []
             for result in code_completion_results:
                 kind = self._ast_node_id_to_vim_complete_item_kind(ClangParser.to_ast_node_id(result.kind))
-                result_type, candidate, params = self._extract_chunks(result.string)
-                candidate_list.append(
-                    self._create_vim_complete_item(
-                        candidate + '(' + ')' if kind == 'f' else candidate,
-                        candidate + '(' + ', '.join(params) + ')' if kind == 'f' else candidate,
-                        kind,
-                        result_type
-                    )
-                )
+                if kind != '':
+                    result_type, candidate, params = self._extract_chunks(result.string)
+                    if candidate:
+                        candidate_list.append(
+                            self._create_vim_complete_item(
+                                candidate + '(' + ')' if kind == 'f' else candidate,
+                                candidate + '(' + ', '.join(params) + ')' if kind == 'f' else candidate,
+                                kind,
+                                result_type
+                            )
+                        )
+                else:
+                    logging.error('Cannot handle following cursor kind: {0}'.format(result.kind))
             call_vim_rpc(success, candidate_list)
             logging.info('Found {0} candidates.'.format(len(candidate_list)))
         else:
