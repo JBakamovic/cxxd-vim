@@ -1,4 +1,6 @@
 import logging
+import os
+import tempfile
 from utils import Utils
 from cxxd.parser.ast_node_identifier import ASTNodeId
 from cxxd.parser.clang_parser import ClangParser
@@ -6,6 +8,7 @@ from cxxd.parser.clang_parser import ClangParser
 class VimAutoCompletion():
     def __init__(self, servername):
         self.servername = servername
+        self.code_complete_candidates_output = os.path.join(tempfile.gettempdir(), self.servername + 'code_complete_candidates')
 
     def _create_vim_complete_item(self, candidate, detailed_candidate, kind, result_type, extra_documentation = None):
         return {
@@ -83,10 +86,10 @@ class VimAutoCompletion():
         return ''
 
     def __call__(self, success, payload, code_completion_results):
-        def call_vim_rpc(status, completion_candidates):
+        def call_vim_rpc(status, completion_candidates, length):
             Utils.call_vim_remote_function(
                 self.servername,
-                "cxxd#services#source_code_model#auto_completion#run_callback(" + str(int(status)) + ", " + str(completion_candidates) + ")"
+                "cxxd#services#source_code_model#auto_completion#run_callback(" + str(int(status)) + ", '" + str(completion_candidates) + "', " + str(length) + ")"
             )
 
         if success:
@@ -106,8 +109,12 @@ class VimAutoCompletion():
                         )
                 else:
                     logging.error('Cannot handle following cursor kind: {0}'.format(result.kind))
-            call_vim_rpc(success, candidate_list)
+
+            with open(self.code_complete_candidates_output, 'w', 0) as f:
+                f.writelines(', '.join(str(item) for item in candidate_list))
+
+            call_vim_rpc(success, self.code_complete_candidates_output, len(candidate_list))
             logging.info('Found {0} candidates.'.format(len(candidate_list)))
         else:
-            call_vim_rpc(success, [])
+            call_vim_rpc(success, [], 0)
             logging.error('Something went wrong in auto-completion service ... Payload = {0}'.format(payload))

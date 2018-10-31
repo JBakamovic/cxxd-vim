@@ -46,18 +46,22 @@ endfunction
 " Function:     cxxd#services#source_code_model#auto_completion#run_callback()
 " Description:  Opens up the pop-up menu populated with candidate list.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#source_code_model#auto_completion#run_callback(status, auto_completion_candidates)
+function! cxxd#services#source_code_model#auto_completion#run_callback(status, auto_completion_candidates, len)
     if a:status == v:true
         setlocal completeopt=menuone,noinsert,noselect
         setlocal complete=
-        if !empty(a:auto_completion_candidates)
+        if a:len > 0
             let l:idx = cxxd#utils#last_occurence_of_non_identifier(getline('.')[0:(col('.')+1)])
             if l:idx == -1
                 let l:start_completion_col = 0
             else
                 let l:start_completion_col = col('.') - l:idx
             endif
-            call complete(l:start_completion_col, a:auto_completion_candidates)
+python << EOF
+import vim
+with open(vim.eval('a:auto_completion_candidates'), 'r') as f:
+    vim.eval("complete(" + vim.eval('l:start_completion_col') + ", [" + f.read() + "])")
+EOF
         endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (auto_completion) service. See Cxxd server log for more details!' | echohl None
