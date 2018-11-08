@@ -117,8 +117,7 @@ let g:cxxd_supported_comp_db    = {
 "
 augroup cxxd_init_deinit
     autocmd!
-    autocmd VimEnter                *                                           call cxxd#server#start()
-    autocmd VimLeave                *                                           call cxxd#server#stop()
+    autocmd VimLeave                *                                           call cxxd#server#stop(v:false)
     autocmd VimEnter,WinEnter       *                                           call cxxd#utils#init_window_specific_vars()
 augroup END
 
@@ -147,8 +146,8 @@ augroup END
 "
 " Cxxd commands
 "
-:command -nargs=1 -complete=dir CxxdStart                             :call cxxd#server#start_all_services(fnamemodify(<f-args>, ':p'))
-:command                        CxxdStop                              :call cxxd#server#stop_all_services(v:false)
+:command -nargs=1 -complete=dir CxxdStart                             :call cxxd#server#start(fnamemodify(<f-args>, ':p'))
+:command                        CxxdStop                              :call cxxd#server#stop(v:false)
 :command                        CxxdGoToInclude                       :call cxxd#services#source_code_model#go_to_include#run(expand('%:p'), line('.'))
 :command                        CxxdGoToDefinition                    :call cxxd#services#source_code_model#go_to_definition#run(expand('%:p'), line('.'), col('.'))
 :command                        CxxdFindAllReferences                 :call cxxd#services#source_code_model#indexer#find_all_references(expand('%:p'), line('.'), col('.'))

@@ -18,7 +18,7 @@ python server_handle = None
 " Function:     cxxd#server#start()
 " Description:  Starts cxxd server.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#server#start()
+function! cxxd#server#start(project_root_directory)
 python << EOF
 import os
 import tempfile
@@ -28,17 +28,19 @@ vim_server_name = vim.eval('v:servername')
 server_handle = cxxd.api.server_start(
     server.get_instance,
     vim_server_name,
+    vim.eval('a:project_root_directory'),
     tempfile.gettempdir() + os.sep + vim_server_name + '_server.log'
 )
 EOF
+    call cxxd#server#start_all_services(a:project_root_directory)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#server#stop()
 " Description:  Stops cxxd server.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#server#stop()
-    python cxxd.api.server_stop(server_handle, False)
+function! cxxd#server#stop(subscribe_for_shutdown_callback)
+    python cxxd.api.server_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -46,7 +48,6 @@ endfunction
 " Description:  Starts all cxxd server services.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#server#start_all_services(project_root_directory)
-    let l:clang_format_config_file = a:project_root_directory . '/' . g:cxxd_clang_format['config']   
     let l:compilation_db_path      = cxxd#server#discover_compilation_db(a:project_root_directory)
 
     if l:compilation_db_path == ''
@@ -63,10 +64,10 @@ function! cxxd#server#start_all_services(project_root_directory)
 
     echohl MoreMsg | echomsg 'Compilation database detected at: ' . l:compilation_db_path | echohl None
 
-    call cxxd#services#source_code_model#start(a:project_root_directory, l:compilation_db_path)
+    call cxxd#services#source_code_model#start(l:compilation_db_path)
     call cxxd#services#clang_tidy#start(l:compilation_db_path)
-    call cxxd#services#clang_format#start(l:clang_format_config_file)
-    call cxxd#services#project_builder#start(a:project_root_directory)
+    call cxxd#services#clang_format#start()
+    call cxxd#services#project_builder#start()
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

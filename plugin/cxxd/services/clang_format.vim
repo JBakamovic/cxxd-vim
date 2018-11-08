@@ -2,12 +2,8 @@
 " Function:     cxxd#services#clang_format#start()
 " Description:  Starts the source code formatting background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#clang_format#start(clang_format_config_file)
-    if filereadable(a:clang_format_config_file)
-        python cxxd.api.clang_format_start(server_handle, vim.eval('a:clang_format_config_file'))
-    else
-        echohl WarningMsg | echomsg 'clang-format configuration not found. clang-format service will not be available.' | echohl None
-    endif
+function! cxxd#services#clang_format#start()
+    python cxxd.api.clang_format_start(server_handle)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

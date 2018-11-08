@@ -2,8 +2,8 @@
 " Function:     services#project_builder#start()
 " Description:  Starts the project builder background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#project_builder#start(build_cmd_root_directory)
-    python cxxd.api.project_builder_start(server_handle, vim.eval('a:build_cmd_root_directory'))
+function! cxxd#services#project_builder#start()
+    python cxxd.api.project_builder_start(server_handle)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
