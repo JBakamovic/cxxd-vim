@@ -9,6 +9,8 @@
 * [Configuration](#configuration)
   * [JSON Compilation Database](#json-compilation-database)
   * [Plain txt file](#plain-txt-file)
+* [Extra configuration](#extra-configuration)
+  * [An example configuration](#an-example-configuration)
 * [Colorschemes](#colorschemes)
 * [Usage](#usage)
 * [Screenshots](#screenshots)
@@ -98,6 +100,53 @@ This file **must** be named `compile_flags.txt` and shall contain one compiler f
 -DFEATURE_YY
 -Wall
 -Werror
+```
+
+# Extra configuration
+
+It is possible to provide an extra (**optional**) configuration via `.cxxd_config.json` file which can be used to provide project-specific settings for things such as:
+1. Skipping certain directories during the indexer operation.
+  * I.e. this is handy if you don't want to index directories from build-system artifacts, external dependencies and alike.
+    * This will generally result in better performance of indexer.
+2. Configuring clang-tidy by providing *whatever* arguments it supports.
+3. Configuring clang-format by providing *whatever* arguments it supports.
+4. Configuring build-system you use by providing *whatever* arguments it supports.
+
+File is expected to exist at the root of the project directory.
+
+## An example configuration
+
+This is how it *may* look like but it all depends on your personal and project preferences.
+
+```
+{
+    "indexer" : {
+        "exclude-dirs" : [
+            "cmake",
+            "CMakeFiles",
+            "external"
+        ]
+    },
+    "clang-tidy" : {
+        "args" : {
+            "-analyze-temporary-dtors" : true,
+            "-explain-config" : false,
+            "-format-style" : "llvm"
+        }
+    },
+    "clang-format" : {
+        "args" : {
+            "-sort-includes" : true,
+            "-verbose" : true,
+            "-style" : "llvm"
+        }
+    },
+    "project-builder" : {
+        "args" : {
+            "--verbose" : true
+        }
+    }
+}
 ```
 
 # Colorschemes
