@@ -46,7 +46,7 @@ endfunction
 function! cxxd#utils#modifications_handler(winnr)
     let l:previous_num_of_changes = getwinvar(a:winnr, 'previous_num_of_changes')
     let l:num_of_changes          = getbufinfo(winbufnr(a:winnr))[0].changedtick
-    let l:more_modifications_done = l:num_of_changes > l:previous_num_of_changes
+    let l:more_modifications_done = l:num_of_changes != l:previous_num_of_changes
     if l:more_modifications_done
         call setwinvar(a:winnr, 'previous_num_of_changes', l:num_of_changes)
     endif
