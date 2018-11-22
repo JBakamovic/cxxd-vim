@@ -6,7 +6,7 @@ function! cxxd#services#source_code_model#go_to_include#run(filename, line)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['go_to_include']['enabled']
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
         let l:contents_filename = a:filename
-        if getbufvar(a:filename, '&modified') && cxxd#utils#is_more_modifications_done(winnr())
+        if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
         endif

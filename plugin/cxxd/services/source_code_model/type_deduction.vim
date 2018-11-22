@@ -12,7 +12,7 @@ function! cxxd#services#source_code_model#type_deduction#run()
 
             " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
             let l:contents_filename = l:current_buffer
-            if getbufvar(bufnr('%'), '&modified') && cxxd#utils#is_more_modifications_done(winnr())
+            if cxxd#utils#is_more_modifications_done(winnr('#'))
                 let l:contents_filename = '/tmp/tmp_' . fnamemodify(l:current_buffer, ':p:t')
                 call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
             endif
