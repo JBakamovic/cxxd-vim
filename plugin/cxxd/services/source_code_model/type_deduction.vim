@@ -3,7 +3,7 @@
 " Description:  Extracts information about the underlying type (on mouse-hover).
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#type_deduction#run()
-    if g:cxxd_src_code_model['services']['type_deduction']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['type_deduction']['enabled']
         " Execute requests only on non-special, ordinary buffers. I.e. ignore NERD_Tree, Tagbar, quickfix and alike.
         " In case of non-ordinary buffers, buffer may not even exist on a disk and triggering the service does not
         " any make sense then.

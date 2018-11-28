@@ -47,7 +47,7 @@ endfunction
 " Description:  Triggers the clang-tidy for given filename and (optionally) applies the fixes.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_tidy#run(filename, apply_fixes)
-    if g:cxxd_clang_tidy['started']
+    if g:cxxd_clang_tidy['started'] && g:cxxd_clang_tidy['enabled']
         python cxxd.api.clang_tidy_request(server_handle, vim.eval('a:filename'), vim.eval('a:apply_fixes'))
     endif
 endfunction

@@ -44,7 +44,7 @@ endfunction
 " Description:  Triggers the formatting on current buffer.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_format#run(filename)
-    if g:cxxd_clang_format['started']
+    if g:cxxd_clang_format['started'] && g:cxxd_clang_format['enabled']
         python cxxd.api.clang_format_request(server_handle, vim.eval('a:filename'))
     endif
 endfunction

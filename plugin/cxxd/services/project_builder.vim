@@ -43,7 +43,7 @@ endfunction
 " Description:  Triggers the build for current project.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#project_builder#run(build_command, ...)
-    if g:cxxd_project_builder['started']
+    if g:cxxd_project_builder['started'] && g:cxxd_project_builder['enabled']
         let l:additional_args = ''
         if a:0 != 0
             let l:additional_args = a:1

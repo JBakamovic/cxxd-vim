@@ -3,7 +3,7 @@
 " Description:  Runs indexer on a single file.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#run_on_single_file(filename)
-    if g:cxxd_src_code_model['services']['indexer']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
         let l:contents_filename = a:filename
         if getbufvar(bufnr('%'), '&modified')
@@ -29,7 +29,7 @@ endfunction
 " Description:  Runs indexer on a whole directory.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#run_on_directory()
-    if g:cxxd_src_code_model['services']['indexer']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         echomsg 'Indexing started ... It may take a while if it is run for the first time.'
         python cxxd.api.source_code_model_indexer_run_on_directory_request(server_handle)
     endif
@@ -53,7 +53,7 @@ endfunction
 " Description:  Drops index for given file from the indexer.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#drop_single_file(filename)
-    if g:cxxd_src_code_model['services']['indexer']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         python cxxd.api.source_code_model_indexer_drop_single_file_request(server_handle, vim.eval('a:filename'))
     endif
 endfunction
@@ -73,7 +73,7 @@ endfunction
 " Description:  Drops all of the indices from the indexer.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#drop_all()
-    if g:cxxd_src_code_model['services']['indexer']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         python cxxd.api.source_code_model_indexer_drop_all_request(server_handle, True)
     endif
 endfunction
@@ -95,7 +95,7 @@ endfunction
 " Description:  Drops the index database and runs indexer again (aka reindexing operation)
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
-    if g:cxxd_src_code_model['services']['indexer']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         echomsg 'About to drop symbol database and re-run the source code indexer ...'
         python cxxd.api.source_code_model_indexer_drop_all_and_run_on_directory_request(server_handle)
     endif
@@ -106,7 +106,7 @@ endfunction
 " Description:  Finds project-wide references of a symbol under the cursor.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#find_all_references(filename, line, col)
-    if g:cxxd_src_code_model['services']['indexer']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         python cxxd.api.source_code_model_indexer_find_all_references_request(server_handle, vim.eval('a:filename'), vim.eval('a:line'), vim.eval('a:col'))
     endif
 endfunction
@@ -134,7 +134,7 @@ endfunction
 " Description:  Fetches all of the source code issues/diagnostics.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#fetch_all_diagnostics(fetch_sorting_strategy)
-    if g:cxxd_src_code_model['services']['indexer']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         python cxxd.api.source_code_model_indexer_fetch_all_diagnostics_request(
 \           server_handle,
 \           vim.eval("a:fetch_sorting_strategy")

@@ -3,7 +3,7 @@
 " Description:  Jumps to the definition of a symbol under the cursor.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#go_to_definition#run(filename, line, col)
-    if g:cxxd_src_code_model['services']['go_to_definition']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['go_to_definition']['enabled']
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
         let l:contents_filename = a:filename
         if getbufvar(a:filename, '&modified')

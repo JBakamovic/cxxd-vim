@@ -3,7 +3,7 @@
 " Description:  Triggers the source code diagnostics for current buffer.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#diagnostics#run(filename)
-    if g:cxxd_src_code_model['services']['diagnostics']['enabled']
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['diagnostics']['enabled']
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
         let l:contents_filename = a:filename
         if getbufvar(a:filename, '&modified')
