@@ -11,6 +11,19 @@ EOF
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#utils#pick_content_filename
+" Description:  Function which short-circuits the input to output if input filename has not been modified.
+"               Otherwise, it returns a new output filename whose name is generated out of the input filename base.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#utils#pick_content_filename(filename)
+    if getbufvar(a:filename, '&modified')
+        return '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
+    else
+        return a:filename
+    endif
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#utils#init_window_specific_vars
 " Description:  Function which instantiates and initializes window-specific variables which we use to emulate
 "               some inexisting events in Vim (e.g. 'ViewportChanged').
