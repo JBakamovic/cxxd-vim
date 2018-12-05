@@ -4,13 +4,10 @@
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#run_on_single_file(filename)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
-        let l:contents_filename = a:filename
-        if cxxd#utils#is_more_modifications_done(winnr('#'))
-            let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
-            call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-        endif
-        python cxxd.api.source_code_model_indexer_run_on_single_file_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'))
+        python cxxd.api.source_code_model_indexer_run_on_single_file_request(
+\           server_handle,
+\           vim.eval('a:filename')
+\       )
     endif
 endfunction
 
