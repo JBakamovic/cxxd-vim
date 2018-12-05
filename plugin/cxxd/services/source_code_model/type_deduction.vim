@@ -11,12 +11,17 @@ function! cxxd#services#source_code_model#type_deduction#run()
             let l:current_buffer = fnamemodify(bufname(v:beval_bufnr), ':p')
 
             " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
-            let l:contents_filename = l:current_buffer
+            let l:contents_filename = cxxd#utils#pick_content_filename(l:current_buffer)
             if cxxd#utils#is_more_modifications_done(winnr('#'))
-                let l:contents_filename = '/tmp/tmp_' . fnamemodify(l:current_buffer, ':p:t')
                 call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
             endif
-            python cxxd.api.source_code_model_type_deduction_request(server_handle, vim.eval('l:current_buffer'), vim.eval('l:contents_filename'), vim.eval('v:beval_lnum'), vim.eval('v:beval_col'))
+            python cxxd.api.source_code_model_type_deduction_request(
+\               server_handle,
+\               vim.eval('l:current_buffer'),
+\               vim.eval('l:contents_filename'),
+\               vim.eval('v:beval_lnum'),
+\               vim.eval('v:beval_col')
+\           )
         endif
     endif
     return ''
