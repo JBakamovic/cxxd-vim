@@ -108,9 +108,12 @@ It is possible to provide an extra (**optional**) configuration via `.cxxd_confi
 1. Skipping certain directories during the indexer operation.
   * I.e. this is handy if you don't want to index directories from build-system artifacts, external dependencies and alike.
     * This will generally result in better performance of indexer.
-2. Configuring clang-tidy by providing *whatever* arguments it supports.
-3. Configuring clang-format by providing *whatever* arguments it supports.
-4. Configuring build-system you use by providing *whatever* arguments it supports.
+2. Defining non-standard C and C++ file extensions your project might be using (e.g. '.tcc', '.txx', '.whatever').
+  * This is important if you want to get precise indexer operations (e.g. `find-all-references`) because it instructs
+    the indexer to index those files as well.
+3. Configuring clang-tidy by providing *whatever* arguments it supports.
+4. Configuring clang-format by providing *whatever* arguments it supports.
+5. Configuring build-system you use by providing *whatever* arguments it supports.
 
 File is expected to exist at the root of the project directory.
 
@@ -125,6 +128,10 @@ This is how it *may* look like but it all depends on your personal and project p
             "cmake",
             "CMakeFiles",
             "external"
+        ],
+        "extra-file-extensions" : [
+            ".tcc",
+            ".txx"
         ]
     },
     "clang-tidy" : {
