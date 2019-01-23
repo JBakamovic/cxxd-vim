@@ -57,13 +57,14 @@ endfunction
 " Description:  Handler which checks if more modifications has been done in given window and accordingly set relevant variables.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#modifications_handler(winnr)
-    let l:previous_num_of_changes = getwinvar(a:winnr, 'previous_num_of_changes')
-    let l:num_of_changes          = getbufinfo(winbufnr(a:winnr))[0].changedtick
-    let l:more_modifications_done = l:num_of_changes != l:previous_num_of_changes
-    if l:more_modifications_done
+    if getbufinfo(winbufnr(a:winnr))[0].changed
+        let l:previous_num_of_changes = getwinvar(a:winnr, 'previous_num_of_changes')
+        let l:num_of_changes          = getbufinfo(winbufnr(a:winnr))[0].changedtick
         call setwinvar(a:winnr, 'previous_num_of_changes', l:num_of_changes)
+        call setwinvar(a:winnr, 'more_modifications_done', l:num_of_changes != l:previous_num_of_changes)
+    else
+        call setwinvar(a:winnr, 'more_modifications_done', v:false)
     endif
-    call setwinvar(a:winnr, 'more_modifications_done', l:more_modifications_done)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
