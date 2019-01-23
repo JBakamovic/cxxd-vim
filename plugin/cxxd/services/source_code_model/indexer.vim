@@ -165,3 +165,40 @@ EOF
     endif
 endfunction
 
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#indexer#fetch_symbols()
+" Description:  Fetches all of the source code issues/diagnostics.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#services#source_code_model#indexer#fetch_symbols(filename)
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
+        python cxxd.api.source_code_model_indexer_fetch_symbols_request(
+\           server_handle,
+\           vim.eval("a:filename")
+\       )
+    endif
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#indexer#fetch_symbols_callback()
+" Description:  Symbols of given translation unit.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#services#source_code_model#indexer#fetch_symbols_callback(status, symbols)
+    if a:status == v:true
+        if len(a:symbols)
+            echohl WarningMsg | echomsg 'Some issues during source code indexing were found. For better experience, please inspect those in QuickFix window.' | echohl None
+        else
+            echohl MoreMsg | echomsg 'Kewl. No issues were found with the code.' | echohl None
+        endif
+python << EOF
+import vim
+with open(vim.eval('a:symbols'), 'r') as f:
+    vim.eval("setqflist([" + f.read() + "], 'r')")
+EOF
+        execute('copen')
+        redraw
+    else
+        echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-fetch-symbols) service. See Cxxd server log for more details!' | echohl None
+    endif
+endfunction
+
+
