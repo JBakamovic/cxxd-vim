@@ -9,6 +9,7 @@ class VimIndexer(object):
         self.servername = servername
         self.find_all_references_output = os.path.join(tempfile.gettempdir(), self.servername + 'find_all_references')
         self.fetch_all_diagnostics_output = os.path.join(tempfile.gettempdir(), self.servername + 'fetch_all_diagnostics')
+        self.fetch_symbols_output = os.path.join(tempfile.gettempdir(), self.servername + 'fetch_symbols')
         self.op = {
             SourceCodeModelIndexerRequestId.RUN_ON_SINGLE_FILE    : self.__run_on_single_file,
             SourceCodeModelIndexerRequestId.RUN_ON_DIRECTORY      : self.__run_on_directory,
@@ -16,6 +17,7 @@ class VimIndexer(object):
             SourceCodeModelIndexerRequestId.DROP_ALL              : self.__drop_all,
             SourceCodeModelIndexerRequestId.FIND_ALL_REFERENCES   : self.__find_all_references,
             SourceCodeModelIndexerRequestId.FETCH_ALL_DIAGNOSTICS : self.__fetch_all_diagnostics,
+            SourceCodeModelIndexerRequestId.FETCH_SYMBOLS         : self.__fetch_symbols,
         }
 
     def __call__(self, success, payload, args):
@@ -107,3 +109,24 @@ class VimIndexer(object):
             "cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback(" + str(int(success)) + ", '" + self.fetch_all_diagnostics_output + "')"
         )
         logging.debug("Diagnostics: " + str(quickfix_list))
+
+    def __fetch_symbols(self, success, symbols):
+        symbol_list = symbols # []
+        #for symbol in symbols:
+        #    filename, usr, line, column, kind = symbol
+        #    symbol_list.append(
+        #        "{'filename': '" + filename + "', " +
+        #        "'lnum': '" + str(line) + "', " +
+        #        "'col': '" + str(column) + "', " +
+        #        "'type': 'I', " +
+        #        "'text': '" + context.replace("'", r"''").rstrip() + "'}"
+        #    )
+
+        with open(self.fetch_symbols_output, 'w', 0) as f:
+            f.writelines(', '.join(str(item) for item in symbol_list))
+
+        Utils.call_vim_remote_function(
+            self.servername,
+            "cxxd#services#source_code_model#indexer#fetch_symbols_callback(" + str(int(success)) + ", '" + self.fetch_symbols_output + "')"
+        )
+        logging.info("Symbols: " + str(symbol_list))
