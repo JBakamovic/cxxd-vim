@@ -3,6 +3,7 @@
 " Description:  Function which serializes current buffer contents to the given filename.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#serialize_current_buffer_contents(to_filename)
+echomsg 'Serializing buffer contents ...'
 python << EOF
 import vim
 temp_file = open(vim.eval('a:to_filename'), "w", 0)
@@ -60,6 +61,9 @@ function! cxxd#utils#modifications_handler(winnr)
     if getbufinfo(winbufnr(a:winnr))[0].changed
         let l:previous_num_of_changes = getwinvar(a:winnr, 'previous_num_of_changes')
         let l:num_of_changes          = getbufinfo(winbufnr(a:winnr))[0].changedtick
+        if l:num_of_changes != l:previous_num_of_changes
+            echomsg "Really?!"
+        endif
         call setwinvar(a:winnr, 'previous_num_of_changes', l:num_of_changes)
         call setwinvar(a:winnr, 'more_modifications_done', l:num_of_changes != l:previous_num_of_changes)
     else

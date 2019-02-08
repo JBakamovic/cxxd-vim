@@ -13,6 +13,7 @@ function! cxxd#services#source_code_model#type_deduction#run()
             " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
             let l:contents_filename = cxxd#utils#pick_content_filename(l:current_buffer)
             if cxxd#utils#is_more_modifications_done(winnr('#'))
+                echomsg 'Serializing buffer contents from TYPE-DEDUCTION.'
                 call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
             endif
             python cxxd.api.source_code_model_type_deduction_request(
