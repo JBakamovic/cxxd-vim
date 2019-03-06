@@ -177,6 +177,8 @@ nmap <unique>       <F12>      :CxxdGoToDefinition<CR>                          
 imap <unique>       <F12>      <ESC>:CxxdGoToDefinition<CR>i
 nmap <unique>       <S-F12>    :vsp <CR>:CxxdGoToDefinition<CR>                 | " Jump to symbol definition in a vertical split
 imap <unique>       <S-F12>    <ESC>:vsp <CR>:CxxdGoToDefinition<CR>i
+nmap <unique>       <C-F12>    :sp <CR>:CxxdGoToDefinition<CR>                  | " Jump to symbol definition in a horizontal split
+imap <unique>       <C-F12>    <ESC>:sp <CR>:CxxdGoToDefinition<CR>i
 nmap <unique>       <C-\>s     :CxxdFindAllReferences<CR>                       | " Find all references of symbol under the cursor
 imap <unique>       <C-\>s     <ESC>:CxxdFindAllReferences<CR>i
 nmap <unique>       <C-\>d     :CxxdFetchAllDiagnosticsBySeverityDesc<CR>       | " Fetch all diagnostics sorted by severity descending
