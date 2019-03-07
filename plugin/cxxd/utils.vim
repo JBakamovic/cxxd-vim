@@ -32,6 +32,8 @@ endfunction
 function! cxxd#utils#init_window_specific_vars()
     if !exists('w:text_changed')                | let w:text_changed                = v:false | endif
     if !exists('w:text_changed_i')              | let w:text_changed_i              = v:false | endif
+    if !exists('w:previous_num_of_changes')     | let w:previous_num_of_changes     = 0       | endif
+    if !exists('w:more_modifications_done')     | let w:more_modifications_done     = v:false | endif
     if !exists('w:previous_visible_line_begin') | let w:previous_visible_line_begin = 0       | endif
     if !exists('w:previous_visible_line_end')   | let w:previous_visible_line_end   = 0       | endif
     if !exists('w:viewport_changed')            | let w:viewport_changed            = v:false | endif
@@ -53,10 +55,6 @@ function! cxxd#utils#is_viewport_changed(winnr)
     return getwinvar(a:winnr, 'viewport_changed')
 endfunction
 
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Function:     cxxd#utils#modifications_handler
-" Description:  Handler which checks if more modifications has been done in given window and accordingly set relevant variables.
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#modifications_handler_i(winnr)
     call setwinvar(a:winnr, 'text_changed', v:true)
     call setwinvar(a:winnr, 'text_changed_i', v:true)
@@ -68,6 +66,21 @@ function! cxxd#utils#modifications_handler_p(winnr)
         call setwinvar(a:winnr, 'text_changed_i', v:false)
     else
         call setwinvar(a:winnr, 'text_changed', v:true)
+    endif
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#utils#modifications_handler
+" Description:  Handler which checks if more modifications has been done in given window and accordingly set relevant variables.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#utils#modifications_handler(winnr)
+    if getbufinfo(winbufnr(a:winnr))[0].changed
+        let l:previous_num_of_changes = getwinvar(a:winnr, 'previous_num_of_changes')
+        let l:num_of_changes          = getbufinfo(winbufnr(a:winnr))[0].changedtick
+        call setwinvar(a:winnr, 'previous_num_of_changes', l:num_of_changes)
+        call setwinvar(a:winnr, 'more_modifications_done', l:num_of_changes != l:previous_num_of_changes)
+    else
+        call setwinvar(a:winnr, 'more_modifications_done', v:false)
     endif
 endfunction
 
