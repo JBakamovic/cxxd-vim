@@ -114,7 +114,7 @@ augroup cxxd_handle_window_specific_vars
     autocmd!
     autocmd TextChangedI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler_i(winnr())
     autocmd TextChangedP             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler_p(winnr())
-    autocmd CursorHold,CursorHoldI   *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#viewport_handler(winnr(), line('w0'), line('w$'))
+    autocmd CursorHold,CursorHoldI   *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler(winnr()) | call cxxd#utils#viewport_handler(winnr(), line('w0'), line('w$'))
 augroup END
 
 augroup cxxd_source_code_model_indexer

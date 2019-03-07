@@ -44,7 +44,7 @@ endfunction
 " Description:  Check if more modifications has been done in given window.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#is_more_modifications_done(winnr)
-    return getwinvar(a:winnr, 'text_changed')
+    return getwinvar(a:winnr, 'text_changed') && getwinvar(a:winnr, 'more_modifications_done')
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
