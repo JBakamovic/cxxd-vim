@@ -146,3 +146,7 @@ EOF
     return l:idx
 endfunction
 
+function! cxxd#utils#statement_finished(str)
+    let l:last_char = a:str[len(a:str)-1]
+    return l:last_char == ';' || l:last_char == '}'
+endfunction

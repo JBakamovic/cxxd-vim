@@ -131,13 +131,13 @@ augroup END
 augroup cxxd_source_code_model_diagnostics
     autocmd!
     autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
 augroup END
 
 augroup cxxd_source_code_model_semantic_syntax_highlight
     autocmd!
     autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
 augroup END
 
 augroup cxxd_clang_format
