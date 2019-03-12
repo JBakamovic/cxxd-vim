@@ -76,6 +76,11 @@ let g:cxxd_src_code_model       = {
 \                                   }
 \}
 
+let g:cxxd_code_completion      = {
+\                                   'enabled' : 1,
+\                                   'started' : 0,
+\}
+
 let g:cxxd_project_builder      = {
 \                                   'enabled' : 1,
 \                                   'started' : 0,
