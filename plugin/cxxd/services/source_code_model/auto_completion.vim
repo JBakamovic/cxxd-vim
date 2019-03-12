@@ -40,6 +40,8 @@ import vim
 with open(vim.eval('a:auto_completion_candidates'), 'r') as f:
     vim.eval("complete(" + vim.eval('l:start_completion_col') + ", [" + f.read() + "])")
 EOF
+        else
+            call complete(col('.'), [])
         endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (auto_completion) service. See Cxxd server log for more details!' | echohl None
