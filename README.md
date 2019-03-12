@@ -114,8 +114,12 @@ It is possible to provide an extra (**optional**) configuration via `.cxxd_confi
 3. Configuring clang-tidy by providing *whatever* arguments it supports.
 4. Configuring clang-format by providing *whatever* arguments it supports.
 5. Configuring build-system you use by providing *whatever* arguments it supports.
+6. Selecting specific clang-tidy executable.
+ * Useful if you don't want to use system-wide available clang-tidy executable (default).
+7. Selecting specific clang-format executable.
+ * Useful if you don't want to use system-wide available clang-format executable (default).
 
-File is expected to exist at the root of the project directory.
+File is expected to exist at the root of the project directory. How to write one see next section.
 
 ## An example configuration
 
@@ -135,6 +139,7 @@ This is how it *may* look like but it all depends on your personal and project p
         ]
     },
     "clang-tidy" : {
+        "binary" : "/opt/clang+llvm-5.0.1-x86_64-linux-gnu/bin/clang-tidy",
         "args" : {
             "-analyze-temporary-dtors" : true,
             "-explain-config" : false,
@@ -142,6 +147,7 @@ This is how it *may* look like but it all depends on your personal and project p
         }
     },
     "clang-format" : {
+        "binary" : "/opt/clang+llvm-5.0.1-x86_64-linux-gnu/bin/clang-format",
         "args" : {
             "-sort-includes" : true,
             "-verbose" : true,
