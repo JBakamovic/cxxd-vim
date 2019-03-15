@@ -22,12 +22,10 @@ class VimSourceCodeModel(ServicePlugin):
         self.go_to_include = VimGoToInclude(self.servername)
 
     def startup_callback(self, success, payload):
-        compiler_args_filename = payload[0]
         Utils.call_vim_remote_function(
             self.servername,
             "cxxd#services#source_code_model#start_callback(" + str(int(success)) + ")"
         )
-        logging.info("SourceCodeModel configured with: compiler args='{0}'".format(compiler_args_filename))
 
     def shutdown_callback(self, success, payload):
         reply_with_callback = bool(payload[0])

@@ -2,12 +2,8 @@
 " Function:     cxxd#services#clang_tidy#start()
 " Description:  Starts the clang-tidy background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#clang_tidy#start(compilation_db_path)
-    if filereadable(a:compilation_db_path)
-        python cxxd.api.clang_tidy_start(server_handle, vim.eval('a:compilation_db_path'))
-    else
-        echohl WarningMsg | echomsg 'clang-tidy requires compilation database which is not found. clang-tidy service will not be available.' | echohl None
-    endif
+function! cxxd#services#clang_tidy#start()
+    python cxxd.api.clang_tidy_start(server_handle)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

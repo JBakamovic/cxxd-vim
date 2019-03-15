@@ -2,12 +2,12 @@
 " Function:     cxxd#services#source_code_model#start()
 " Description:  Starts the source code model background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#source_code_model#start(compilation_db_path)
+function! cxxd#services#source_code_model#start()
     " Enable balloon expressions if TypeDeduction service is enabled.
     if g:cxxd_src_code_model['services']['type_deduction']['enabled']
         set ballooneval balloonexpr=cxxd#services#source_code_model#type_deduction#run()
     endif
-    python cxxd.api.source_code_model_start(server_handle, vim.eval('a:compilation_db_path'))
+    python cxxd.api.source_code_model_start(server_handle)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
