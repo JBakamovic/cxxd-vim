@@ -58,7 +58,7 @@ function! cxxd#server#start_all_services()
     call cxxd#services#clang_tidy#start()
     call cxxd#services#clang_format#start()
     call cxxd#services#project_builder#start()
-    call cxxd#services#source_code_model#auto_completion#start(l:compilation_db_path)
+    call cxxd#services#source_code_model#auto_completion#start()
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

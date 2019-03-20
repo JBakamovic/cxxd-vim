@@ -1,9 +1,5 @@
-function! cxxd#services#source_code_model#auto_completion#start(compilation_db_path)
-    if filereadable(a:compilation_db_path)
-        python cxxd.api.code_completion_start(server_handle, vim.eval('a:compilation_db_path'))
-    else
-        echohl WarningMsg | echomsg 'code-completion requires compilation database which is not found. code-completion service will not be available.' | echohl None
-    endif
+function! cxxd#services#source_code_model#auto_completion#start()
+    python cxxd.api.code_completion_start(server_handle)
 endfunction
 
 function! cxxd#services#source_code_model#auto_completion#start_callback(status)
