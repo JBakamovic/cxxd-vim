@@ -51,7 +51,7 @@ function! cxxd#services#source_code_model#auto_completion#run_callback(status, a
         if a:len > 0
             let l:idx = cxxd#utils#last_occurence_of_non_identifier(getline('.')[0:(col('.')+1)])
             if l:idx == -1
-                let l:start_completion_col = 0
+                let l:start_completion_col = 1
             else
                 let l:start_completion_col = col('.') - l:idx
             endif
