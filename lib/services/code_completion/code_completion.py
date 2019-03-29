@@ -5,6 +5,7 @@ from utils import Utils
 from cxxd.parser.ast_node_identifier import ASTNodeId
 from cxxd.parser.clang_parser import ClangParser
 from cxxd.service_plugin import ServicePlugin
+from cxxd.services.source_code_model.auto_completion.auto_completion import SourceCodeModelAutoCompletionRequestId
 
 class VimCodeCompletion(ServicePlugin):
     def __init__(self, servername):
@@ -95,6 +96,21 @@ class VimCodeCompletion(ServicePlugin):
             Utils.call_vim_remote_function(self.servername, "cxxd#services#source_code_model#auto_completion#stop_callback(" + str(int(success)) + ")")
 
     def __call__(self, success, payload, code_completion_results):
+        if not success:
+            logging.error('Something went wrong in code-completion service ... Payload = {0}'.format(payload))
+
+        code_completion_op_id = int(payload[0])
+        if code_completion_op_id == SourceCodeModelAutoCompletionRequestId.CODE_COMPLETE:
+            self.__code_complete(success, payload, code_completion_results)
+        elif code_completion_op_id == SourceCodeModelAutoCompletionRequestId.CACHE_WARMUP:
+            self.__cache_warmup(success, payload, code_completion_results)
+        else:
+            logging.error('Invalid code-completion request ID: {0}'.format(code_completion_op_id))
+
+    def __cache_warmup(self, success, payload, code_completion_results):
+        logging.info('Warming up the code-completion cache ...')
+
+    def __code_complete(self, success, payload, code_completion_results):
         def call_vim_rpc(status, completion_candidates, length):
             Utils.call_vim_remote_function(
                 self.servername,
@@ -126,5 +142,3 @@ class VimCodeCompletion(ServicePlugin):
             logging.info('Found {0} candidates.'.format(len(candidate_list)))
         else:
             call_vim_rpc(success, [], 0)
-            logging.error('Something went wrong in auto-completion service ... Payload = {0}'.format(payload))
-
