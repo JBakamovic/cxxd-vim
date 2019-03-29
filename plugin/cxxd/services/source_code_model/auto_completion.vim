@@ -68,3 +68,16 @@ EOF
     endif
 endfunction
 
+function! cxxd#services#source_code_model#auto_completion#cache_warmup(filename)
+    let l:last_line = line('$')
+    let l:last_col = col([l:last_line, '$'])
+    if g:cxxd_code_completion['started'] && g:cxxd_code_completion['enabled']
+        python cxxd.api.code_complete_cache_warmup_request(
+\           server_handle,
+\           vim.eval('a:filename'),
+\           vim.eval('l:last_line'),
+\           vim.eval('l:last_col')
+\       )
+    endif
+endfunction
+
