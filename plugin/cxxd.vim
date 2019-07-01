@@ -117,40 +117,44 @@ augroup END
 
 augroup cxxd_handle_window_specific_vars
     autocmd!
-    autocmd TextChangedI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler_i(winnr())
-    autocmd TextChangedP             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler_p(winnr())
-    autocmd CursorHold,CursorHoldI   *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler(winnr()) | call cxxd#utils#viewport_handler(winnr(), line('w0'), line('w$'))
+    autocmd TextChangedI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp  call cxxd#utils#modifications_handler_i(winnr())
+    autocmd TextChangedP             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp call cxxd#utils#modifications_handler_p(winnr())
+    autocmd CursorHold,CursorHoldI   *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp call cxxd#utils#modifications_handler(winnr()) | call cxxd#utils#viewport_handler(winnr(), line('w0'), line('w$'))
 augroup END
 
 augroup cxxd_source_code_model_indexer
     autocmd!
-    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#indexer#run_on_single_file(expand('%:p'))
+    "autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#indexer#run_on_single_file(expand('%:p'))
 augroup END
 
 augroup cxxd_source_code_model_auto_completion
     autocmd!
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.')-1)
-    autocmd TextChangedP            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.')-1)
-    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#auto_completion#cache_warmup(expand('%:p'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.')-1)
+    autocmd TextChangedP            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.')-1)
+    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#auto_completion#cache_warmup(expand('%:p'))
 augroup END
 
 augroup cxxd_source_code_model_diagnostics
     autocmd!
-    autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
-    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if !empty(v:completed_item) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
+    "autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
+    "autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
+    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   if !empty(v:completed_item) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
+    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
+    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
 augroup END
 
+" TODO CursorHoldI cxxd#utils#statement_finished must go after is_more_modifications_done().
+" Otherwise, we will not end up updating the syn-hl when scrolling the window in INSERT mode.
 augroup cxxd_source_code_model_semantic_syntax_highlight
     autocmd!
-    autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
-    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if !empty(v:completed_item) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
+    autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
+    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   if !empty(v:completed_item) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
 augroup END
 
 augroup cxxd_clang_format
     autocmd!
-    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#clang_format#run(expand('%:p'))
+    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#clang_format#run(expand('%:p'))
 augroup END
 
 "
@@ -203,7 +207,7 @@ imap <unique>       <F9>       <ESC>:CxxdBuildRun<CR>i
 
 "
 " Important to be set to a much lower value than a default one (=4000) because some
-" services act upon 'CursorHoldI' event. I.e. semantic syntax highlighting and diagnostics.
+" services act upon 'CursorHoldI' event. I.e. semantic syntax highlighting, diagnostics and code completion.
 "
 set updatetime=250
 

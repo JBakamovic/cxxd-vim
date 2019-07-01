@@ -57,7 +57,7 @@ function! cxxd#services#clang_format#run_callback(status, filename)
     if a:status == v:true
         " TODO Ideally, re-indexing logic shall not be client's code (frontend) responsibility. We need to enable communication
         " between components on Cxxd server level.
-        call cxxd#services#source_code_model#indexer#run_on_single_file(a:filename)
+        call cxxd#services#source_code_model#indexer#run_on_single_file(a:filename) " TODO how do we avoid running indexer twice?
         let l:current_buffer = expand('%:p')
         if l:current_buffer == a:filename
             execute('e')

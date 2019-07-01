@@ -108,7 +108,7 @@ class VimCodeCompletion(ServicePlugin):
             logging.error('Invalid code-completion request ID: {0}'.format(code_completion_op_id))
 
     def __cache_warmup(self, success, payload, code_completion_results):
-        logging.info('Warming up the code-completion cache ...')
+        logging.info('Warming up the code-completion cache done') 
 
     def __code_complete(self, success, payload, code_completion_results):
         def call_vim_rpc(status, completion_candidates, length):
