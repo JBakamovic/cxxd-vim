@@ -57,24 +57,17 @@ If you're not using any of the plugin managers, you can simply clone the reposit
 [Here](https://github.com/JBakamovic/cxxd/blob/master/README.md#supported-platforms)
 
 # Configuration
-For the best experience, your project root directory shall expose a configuration file which contains compiler flags being used for the build. It can be done with either of the following methods:
+Your project **must** provide either of the following:
 * [JSON Compilation Database](#json-compilation-database) **or**
 * a simple [plain txt file](#plain-txt-file)
 
-## Where do you put a configuration file?
+In case it doesn't, `cxxd` server will not have enough details to provide quality service and therefore it will bail-out during the startup.
 
-Be it JSON compilation database or simple plain txt file `cxxd-vim` will try its best to auto-detect the location of
-file by searching through commonly expected build locations such as:
-* `.` (root directory where the source code is),
-* `build`,
-* `build_cmake`,
-* `cmake_build`,
-* `../build`,
-* `../build_cmake`,
-* `../cmake_build`
+## What directory do you put these files in?
 
-These search paths are **configurable** via [`g:cxxd_compilation_db_discovery_dir_paths`](https://github.com/JBakamovic/cxxd-vim/blob/master/plugin/cxxd.vim#L65-L73) variable,
-and therefore can be extended with more specific search paths if needed. E.g. when your project uses different paths than the ones provided by default.
+If you don't provide any [extra configuration](#extra-configuration), `cxxd` will try to auto-magically detect the location of either of those files during its startup. This is only a convenience and ok to get you going but recommended method for non-trivial projects is to explicitly provide this setting through this extra configuration file (`.cxxd_config.json`).
+
+For example, many projects will have different build-targets (`Debug` vs. `Release` vs. etc.) and that automatically implies that there will be multiple JSON compilation databases, each for one build target. In order for `cxxd` be able to process that information, we need to express this through `.cxxd_config.json`. See [extra configuration](#extra-configuration) section on more details.
 
 ## JSON Compilation Database
 
@@ -105,18 +98,24 @@ This file **must** be named `compile_flags.txt` and shall contain one compiler f
 # Extra configuration
 
 It is possible to provide an extra (**optional**) configuration via `.cxxd_config.json` file which can be used to provide project-specific settings for things such as:
-1. Skipping certain directories during the indexer operation.
+1. Defining arbitrary number of build-configurations you want to run `cxxd` with.
+  * I.e. `Debug` vs. `Release` vs `RelWithDbgInfo` vs. `WhateverYouHaveInYourProject`
+  * This is important if you want `cxxd` server to understand the differences between different build-configurations.
+    * E.g. This setting will basically impact the whole underlying source-code-model `cxxd` is using, which means that everything from indexing to code-completion and symbol-resolution is going to be (rightly) affected.
+  * Much much more details can be found at [this commit](https://github.com/JBakamovic/cxxd/commit/06d2743cb11fb4c89e69314f60b7e599e2040aef).
+  * For a quickstart how to make use of this feature have a look at the `configuration` section in the underlying example configuration.
+2. Skipping certain directories during the indexer operation.
   * I.e. this is handy if you don't want to index directories from build-system artifacts, external dependencies and alike.
     * This will generally result in better performance of indexer.
-2. Defining non-standard C and C++ file extensions your project might be using (e.g. '.tcc', '.txx', '.whatever').
+3. Defining non-standard C and C++ file extensions your project might be using (e.g. '.tcc', '.txx', '.whatever').
   * This is important if you want to get precise indexer operations (e.g. `find-all-references`) because it instructs
     the indexer to index those files as well.
-3. Configuring clang-tidy by providing *whatever* arguments it supports.
-4. Configuring clang-format by providing *whatever* arguments it supports.
-5. Configuring build-system you use by providing *whatever* arguments it supports.
-6. Selecting specific clang-tidy executable.
+4. Configuring clang-tidy by providing *whatever* arguments it supports.
+5. Configuring clang-format by providing *whatever* arguments it supports.
+6. Configuring build-system you use by providing *whatever* arguments it supports.
+7. Selecting specific clang-tidy executable.
  * Useful if you don't want to use system-wide available clang-tidy executable (default).
-7. Selecting specific clang-format executable.
+8. Selecting specific clang-format executable.
  * Useful if you don't want to use system-wide available clang-format executable (default).
 
 File is expected to exist at the root of the project directory. How to write one see next section.
@@ -127,6 +126,16 @@ This is how it *may* look like but it all depends on your personal and project p
 
 ```
 {
+    "configuration" : {
+        "type" : "compilation-database",
+        "compilation-database" : {
+            "target" : {
+                "debug" : "../debug_build",
+                "release" : "../release_build",
+                "relwithdbginfo" : "../relwithdbginfo_build"
+            }
+        }
+    },
     "indexer" : {
         "exclude-dirs" : [
             "cmake",
@@ -171,7 +180,8 @@ Vanilla `Vim` colorschemes do not handle these groups by default so one will hav
 # Usage
 Command | Default Key-Mapping | Purpose
 ------- | :-------------------: | --------
-`CxxdStart <path_to_your_project_dir>` | None | Starts `cxxd` server for given project directory. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time  depending on the project size).
+`CxxdStart <path-to-your-project-dir>` | None | Starts `cxxd` server for given project directory in auto-discovery mode. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time  depending on the project size).
+`CxxdStart <build-target-name>` | None | Starts `cxxd` server for given build-target. Build-target must exist in `.cxxd_config.json` file. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time  depending on the project size).
 `CxxdStop` | None | Stops `cxxd` server.
 `CxxdRebuildIndex` | `<Ctrl-\>r` | Rebuilds the symbol index database.
 `CxxdGoToInclude` | `<F3>` and `<Shift-F3>` | Jumps to the file included via `#include` directive.
