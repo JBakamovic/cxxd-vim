@@ -181,7 +181,7 @@ Vanilla `Vim` colorschemes do not handle these groups by default so one will hav
 Command | Default Key-Mapping | Purpose
 ------- | :-------------------: | --------
 `CxxdStart <path-to-your-project-dir>` | None | Starts `cxxd` server for given project directory in auto-discovery mode. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time  depending on the project size).
-`CxxdStart <build-target-name>` | None | Starts `cxxd` server for given build-target. Build-target must exist in `.cxxd_config.json` file. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time  depending on the project size).
+`CxxdStart <path-to-your-project-dir> <build-target-name>` | None | Starts `cxxd` server for given project directory and given build-target. Build-target must exist in `.cxxd_config.json` file. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time  depending on the project size).
 `CxxdStop` | None | Stops `cxxd` server.
 `CxxdRebuildIndex` | `<Ctrl-\>r` | Rebuilds the symbol index database.
 `CxxdGoToInclude` | `<F3>` and `<Shift-F3>` | Jumps to the file included via `#include` directive.
