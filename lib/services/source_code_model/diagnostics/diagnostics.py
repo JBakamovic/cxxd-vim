@@ -1,7 +1,9 @@
+from builtins import str
+from builtins import object
 import logging
 from utils import Utils
 
-class VimDiagnostics():
+class VimDiagnostics(object):
     def __init__(self, servername):
         self.servername = servername
 

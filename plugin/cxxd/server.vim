@@ -1,18 +1,18 @@
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Our Python path has to include a parent directory of 'cxxd' submodule.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-python import os, sys, vim
-python sys.path.append(vim.eval("fnamemodify(fnamemodify(expand('<sfile>:p:h'), ':h'), ':h')") + os.sep + 'lib')
+python3 import os, sys, vim, server
+python3 sys.path.append(vim.eval("fnamemodify(fnamemodify(expand('<sfile>:p:h'), ':h'), ':h')") + os.sep + 'lib')
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Our public interface to cxxd.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-python import cxxd.api
+python3 import cxxd.api
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " We need a handle to server to establish the communication.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-python server_handle = None
+python3 server_handle = None
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#server#start()
@@ -24,7 +24,7 @@ function! cxxd#server#start(project_root_directory, ...)
     if a:0 > 0
         let l:target_configuration = a:1    " otherwise what user has provided to us
     endif
-python << EOF
+python3 << EOF
 import os
 import tempfile
 import vim
@@ -46,7 +46,7 @@ endfunction
 " Description:  Stops cxxd server.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#server#stop(subscribe_for_shutdown_callback)
-    python cxxd.api.server_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    python3 cxxd.api.server_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import logging
 import os
 import tempfile
@@ -5,7 +7,7 @@ from utils import Utils
 from cxxd.parser.ast_node_identifier import ASTNodeId
 from cxxd.parser.clang_parser import ClangParser
 
-class VimAutoCompletion():
+class VimAutoCompletion(object):
     def __init__(self, servername):
         self.servername = servername
         self.code_complete_candidates_output = os.path.join(tempfile.gettempdir(), self.servername + 'code_complete_candidates')

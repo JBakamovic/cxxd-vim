@@ -11,7 +11,7 @@ else
             \ echohl None
         call feedkeys("\<CR>")
         finish
-    elseif !has("python")
+    elseif !has("python3")
         echohl WarningMsg |
             \ echoerr "cxxd-vim requires (G)Vim compiled with 'python' feature." |
             \ echohl None

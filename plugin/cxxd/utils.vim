@@ -4,7 +4,7 @@
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#serialize_current_buffer_contents(to_filename)
 echomsg 'Serializing buffer contents ...'
-python << EOF
+python3 << EOF
 import vim
 f = open(vim.eval('a:to_filename'), "w", 0)
 f.writelines(line + '\n' for line in vim.current.buffer)
@@ -129,7 +129,7 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#last_occurence_of_non_identifier(str)
     let l:idx = -1
-python << EOF
+python3 << EOF
 import vim
 def is_identifier(char):
     is_digit = char.isdigit()

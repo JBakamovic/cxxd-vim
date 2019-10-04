@@ -1,3 +1,4 @@
+from builtins import str
 import logging
 from utils import Utils
 from cxxd.service_plugin import ServicePlugin

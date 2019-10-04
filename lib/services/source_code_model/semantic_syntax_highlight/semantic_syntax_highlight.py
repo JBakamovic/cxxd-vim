@@ -1,16 +1,18 @@
+from builtins import str
+from builtins import object
 import logging
 import time
 from utils import Utils
 from cxxd.parser.ast_node_identifier import ASTNodeId
 from cxxd.parser.ctags_parser import CtagsTokenizer
 
-class VimSemanticSyntaxHighlight:
+class VimSemanticSyntaxHighlight(object):
     def __init__(self, servername, output_syntax_file):
         self.servername = servername
         self.output_syntax_file = output_syntax_file
 
     def __call__(self, success, payload, args):
-        class VimHlMatch:
+        class VimHlMatch(object):
             def __init__(self, group, line, column, length):
                 self.group = group
                 self.line = line
