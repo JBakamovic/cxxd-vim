@@ -58,10 +58,10 @@ class VimSemanticSyntaxHighlight(object):
             traverse(tunit, line_begin, line_end, callback, vim_syntax_hl_patterns)
 
             # Write Vim syntax file
-            vim_syntax_file = open(self.output_syntax_file, "w", 0)
-            vim_syntax_file.write(create_clearmatches_pattern() + '\n')                 # TODO 'vim_syntax_hl_patterns' is an unordered set and therefore resulting
-            for hl_pattern in vim_syntax_hl_patterns:                                   #       vim syntax file will contain 'matchaddpos' entries which are not
-                vim_syntax_file.write(create_matchaddpos_pattern(hl_pattern) + '\n')    #       going to be ordered by [line, column]. It needs to be checked if
+            with open(self.output_syntax_file, "w") as vim_syntax_file:
+                vim_syntax_file.write(create_clearmatches_pattern() + '\n')                 # TODO 'vim_syntax_hl_patterns' is an unordered set and therefore resulting
+                for hl_pattern in vim_syntax_hl_patterns:                                   #       vim syntax file will contain 'matchaddpos' entries which are not
+                    vim_syntax_file.write(create_matchaddpos_pattern(hl_pattern) + '\n')    #       going to be ordered by [line, column]. It needs to be checked if
 
             # Apply newly generated syntax rules
             call_vim_rpc(success, payload[1], self.output_syntax_file)
@@ -78,21 +78,21 @@ class VimSemanticSyntaxHighlight(object):
         # Generate the vim syntax file
         tags_db = None
         try:
-            tags_db = open(output_tag_file)
-            # Build Vim syntax highlight rules
-            vim_highlight_rules = set()
-            for line in tags_db:
-                if not tokenizer.is_header(line):
-                    highlight_rule = VimSemanticSyntaxHighlight.__tag_id_to_vim_syntax_group(tokenizer.get_token_id(line)) + " " + tokenizer.get_token_name(line)
-                    vim_highlight_rules.add(highlight_rule)
+            with open(output_tag_file) as tags_db:
+                # Build Vim syntax highlight rules
+                vim_highlight_rules = set()
+                for line in tags_db:
+                    if not tokenizer.is_header(line):
+                        highlight_rule = VimSemanticSyntaxHighlight.__tag_id_to_vim_syntax_group(tokenizer.get_token_id(line)) + " " + tokenizer.get_token_name(line)
+                        vim_highlight_rules.add(highlight_rule)
 
             vim_syntax_hl_patterns = []
             for rule in vim_highlight_rules:
                 vim_syntax_hl_patterns.append("syntax keyword " + rule + "\n")
 
             # Write syntax file
-            vim_syntax_file = open(self.output_syntax_file, "w")
-            vim_syntax_file.writelines(vim_syntax_hl_patterns)
+            with open(self.output_syntax_file, "w") as vim_syntax_file:
+                vim_syntax_file.writelines(vim_syntax_hl_patterns)
         finally:
             if tags_db is not None:
                 tags_db.close()

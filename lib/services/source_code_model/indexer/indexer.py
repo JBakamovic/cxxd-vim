@@ -61,7 +61,7 @@ class VimIndexer(object):
                 "'text': '" + context.replace("'", r"''").rstrip() + "'}"
             )
 
-        with open(self.find_all_references_output, 'w', 0) as f:
+        with open(self.find_all_references_output, 'w') as f:
             f.writelines(', '.join(item for item in quickfix_list))
 
         Utils.call_vim_remote_function(
@@ -101,7 +101,7 @@ class VimIndexer(object):
                 "'text': '" + description.replace("'", r"''").rstrip() + "'}"
             )
 
-        with open(self.fetch_all_diagnostics_output, 'w', 0) as f:
+        with open(self.fetch_all_diagnostics_output, 'w') as f:
             f.writelines(', '.join(item for item in quickfix_list))
 
         Utils.call_vim_remote_function(

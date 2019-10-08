@@ -6,7 +6,7 @@ function! cxxd#utils#serialize_current_buffer_contents(to_filename)
 echomsg 'Serializing buffer contents ...'
 python3 << EOF
 import vim
-f = open(vim.eval('a:to_filename'), "w", 0)
+f = open(vim.eval('a:to_filename'), "w")
 f.writelines(line + '\n' for line in vim.current.buffer)
 f.close()
 EOF

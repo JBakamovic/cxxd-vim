@@ -112,7 +112,7 @@ class VimAutoCompletion(object):
                 else:
                     logging.error('Cannot handle following cursor kind: {0}'.format(result.kind))
 
-            with open(self.code_complete_candidates_output, 'w', 0) as f:
+            with open(self.code_complete_candidates_output, 'w') as f:
                 f.writelines(', '.join(str(item) for item in candidate_list))
 
             call_vim_rpc(success, self.code_complete_candidates_output, len(candidate_list))
