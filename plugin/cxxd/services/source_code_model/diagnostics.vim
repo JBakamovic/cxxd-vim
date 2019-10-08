@@ -13,11 +13,11 @@ function! cxxd#services#source_code_model#diagnostics#run(filename)
 
         let l:winnr = winnr()
         if getloclist(l:winnr) == []
-            python cxxd.api.source_code_model_diagnostics_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'))
+            python3 cxxd.api.source_code_model_diagnostics_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'))
         elseif getloclist(l:winnr)[0].bufnr != winbufnr(l:winnr)
-            python cxxd.api.source_code_model_diagnostics_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'))
+            python3 cxxd.api.source_code_model_diagnostics_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'))
         elseif cxxd#utils#is_more_modifications_done(l:winnr)
-            python cxxd.api.source_code_model_diagnostics_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'))
+            python3 cxxd.api.source_code_model_diagnostics_request(server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'))
         endif
     endif
 endfunction

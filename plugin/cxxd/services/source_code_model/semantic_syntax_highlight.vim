@@ -17,7 +17,7 @@ function! cxxd#services#source_code_model#semantic_syntax_highlight#run(filename
         let l:current_visible_line_begin = line('w0')
         let l:current_visible_line_end = line('w$')
         if cxxd#utils#is_more_modifications_done(winnr()) || cxxd#utils#is_viewport_changed(winnr())
-            python cxxd.api.source_code_model_semantic_syntax_highlight_request(
+            python3 cxxd.api.source_code_model_semantic_syntax_highlight_request(
 \ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
 \ 	        )
         endif

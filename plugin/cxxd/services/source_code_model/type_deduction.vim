@@ -16,7 +16,7 @@ function! cxxd#services#source_code_model#type_deduction#run()
                 echomsg 'Serializing buffer contents from TYPE-DEDUCTION.'
                 call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
             endif
-            python cxxd.api.source_code_model_type_deduction_request(
+            python3 cxxd.api.source_code_model_type_deduction_request(
 \               server_handle,
 \               vim.eval('l:current_buffer'),
 \               vim.eval('l:contents_filename'),

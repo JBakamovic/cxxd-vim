@@ -1,5 +1,5 @@
 function! cxxd#services#source_code_model#auto_completion#start()
-    python cxxd.api.code_completion_start(server_handle)
+    python3 cxxd.api.code_completion_start(server_handle)
 endfunction
 
 function! cxxd#services#source_code_model#auto_completion#start_callback(status)
@@ -11,7 +11,7 @@ function! cxxd#services#source_code_model#auto_completion#start_callback(status)
 endfunction
 
 function! cxxd#services#source_code_model#auto_completion#stop(subscribe_for_shutdown_callback)
-    python cxxd.api.clang_tidy_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    python3 cxxd.api.clang_tidy_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
 endfunction
 
 function! cxxd#services#source_code_model#auto_completion#stop_callback(status)
@@ -27,7 +27,7 @@ function! cxxd#services#source_code_model#auto_completion#run(filename, line, co
         if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = cxxd#utils#pick_content_filename(a:filename)
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-            python cxxd.api.code_complete_request(
+            python3 cxxd.api.code_complete_request(
 \               server_handle,
 \               vim.eval('a:filename'),
 \               vim.eval('l:contents_filename'),
@@ -55,7 +55,7 @@ function! cxxd#services#source_code_model#auto_completion#run_callback(status, a
             else
                 let l:start_completion_col = col('.') - l:idx
             endif
-python << EOF
+python3 << EOF
 import vim
 with open(vim.eval('a:auto_completion_candidates'), 'r') as f:
     vim.eval("complete(" + vim.eval('l:start_completion_col') + ", [" + f.read() + "])")
@@ -72,7 +72,7 @@ function! cxxd#services#source_code_model#auto_completion#cache_warmup(filename)
     let l:last_line = line('$')
     let l:last_col = col([l:last_line, '$'])
     if g:cxxd_code_completion['started'] && g:cxxd_code_completion['enabled']
-        python cxxd.api.code_complete_cache_warmup_request(
+        python3 cxxd.api.code_complete_cache_warmup_request(
 \           server_handle,
 \           vim.eval('a:filename'),
 \           vim.eval('l:last_line'),

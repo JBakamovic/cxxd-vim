@@ -4,7 +4,7 @@
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#run_on_single_file(filename)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python cxxd.api.source_code_model_indexer_run_on_single_file_request(
+        python3 cxxd.api.source_code_model_indexer_run_on_single_file_request(
 \           server_handle,
 \           vim.eval('a:filename')
 \       )
@@ -28,7 +28,7 @@ endfunction
 function! cxxd#services#source_code_model#indexer#run_on_directory()
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         echomsg 'Indexing started ... It may take a while if it is run for the first time.'
-        python cxxd.api.source_code_model_indexer_run_on_directory_request(server_handle)
+        python3 cxxd.api.source_code_model_indexer_run_on_directory_request(server_handle)
     endif
 endfunction
 
@@ -53,7 +53,7 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#drop_single_file(filename)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python cxxd.api.source_code_model_indexer_drop_single_file_request(server_handle, vim.eval('a:filename'))
+        python3 cxxd.api.source_code_model_indexer_drop_single_file_request(server_handle, vim.eval('a:filename'))
     endif
 endfunction
 
