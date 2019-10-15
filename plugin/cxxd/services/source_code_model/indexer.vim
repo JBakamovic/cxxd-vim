@@ -73,7 +73,7 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#drop_all()
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python cxxd.api.source_code_model_indexer_drop_all_request(server_handle, True)
+        python3 cxxd.api.source_code_model_indexer_drop_all_request(server_handle, True)
     endif
 endfunction
 
@@ -96,7 +96,7 @@ endfunction
 function! cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         echomsg 'About to drop symbol database and re-run the source code indexer ...'
-        python cxxd.api.source_code_model_indexer_drop_all_and_run_on_directory_request(server_handle)
+        python3 cxxd.api.source_code_model_indexer_drop_all_and_run_on_directory_request(server_handle)
     endif
 endfunction
 
@@ -112,7 +112,7 @@ function! cxxd#services#source_code_model#indexer#find_all_references(filename, 
             echomsg 'Serializing buffer contents from FIND-ALL-REFERENCES.'
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
         endif
-        python cxxd.api.source_code_model_indexer_find_all_references_request(
+        python3 cxxd.api.source_code_model_indexer_find_all_references_request(
 \           server_handle,
 \           vim.eval('l:contents_filename'),
 \           vim.eval('a:line'),
@@ -127,7 +127,7 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#find_all_references_callback(status, references)
     if a:status == v:true
-python << EOF
+python3 << EOF
 import vim
 with open(vim.eval('a:references'), 'r') as f:
     vim.eval("setqflist([" + f.read() + "], 'r')")
@@ -145,7 +145,7 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#fetch_all_diagnostics(fetch_sorting_strategy)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python cxxd.api.source_code_model_indexer_fetch_all_diagnostics_request(
+        python3 cxxd.api.source_code_model_indexer_fetch_all_diagnostics_request(
 \           server_handle,
 \           vim.eval("a:fetch_sorting_strategy")
 \       )
@@ -163,10 +163,10 @@ function! cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback
         else
             echohl MoreMsg | echomsg 'Kewl. No issues were found with the code.' | echohl None
         endif
-python << EOF
-#import vim
-#with open(vim.eval('a:diagnostics'), 'r') as f:
-#    vim.eval("setqflist([" + f.read() + "], 'r')")
+python3 << EOF
+import vim
+with open(vim.eval('a:diagnostics'), 'r') as f:
+    vim.eval("setqflist([" + f.read() + "], 'r')")
 EOF
         execute('copen')
         redraw
