@@ -3,7 +3,7 @@
 " Description:  Function which serializes current buffer contents to the given filename.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#serialize_current_buffer_contents(to_filename)
-echomsg 'Serializing buffer contents ...'
+"echomsg 'Serializing buffer contents ...'
 python3 << EOF
 import vim
 with open(vim.eval('a:to_filename'), "w") as f:
