@@ -162,8 +162,10 @@ augroup END
 "
 :command -nargs=+ -complete=dir CxxdStart                             :call cxxd#server#start(<f-args>)
 :command                        CxxdStop                              :call cxxd#server#stop(v:false)
-:command                        CxxdGoToInclude                       :call cxxd#services#source_code_model#go_to_include#run(expand('%:p'), line('.'))
-:command                        CxxdGoToDefinition                    :call cxxd#services#source_code_model#go_to_definition#run(expand('%:p'), line('.'), col('.'))
+:command                        CxxdGoToInclude                       :call cxxd#services#source_code_model#go_to_include#run(expand('%:p'), line('.'), v:false)
+:command                        CxxdGoToIncludeInPreview              :call cxxd#services#source_code_model#go_to_include#run(expand('%:p'), line('.'), v:true)
+:command                        CxxdGoToDefinition                    :call cxxd#services#source_code_model#go_to_definition#run(expand('%:p'), line('.'), col('.'), v:false)
+:command                        CxxdGoToDefinitionInPreview           :call cxxd#services#source_code_model#go_to_definition#run(expand('%:p'), line('.'), col('.'), v:true)
 :command                        CxxdFindAllReferences                 :call cxxd#services#source_code_model#indexer#find_all_references(expand('%:p'), line('.'), col('.'))
 :command                        CxxdFetchAllDiagnostics               :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['none'])
 :command                        CxxdFetchAllDiagnosticsBySeverityAsc  :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_asc'])
@@ -181,6 +183,8 @@ augroup END
 "
 nmap <unique>       <F3>       :CxxdGoToInclude<CR>                             | " Open file (header-include) under the cursor
 imap <unique>       <F3>       <ESC>:CxxdGoToInclude<CR>i
+nmap <unique>       <A-F3>     :CxxdGoToIncludeInPreview<CR>                    | " Open file (header-include) under the cursor (preview window)
+imap <unique>       <A-F3>     <ESC>:CxxdGoToIncludeInPreview<CR>i
 nmap <unique>       <S-F3>     :vsp <CR>:CxxdGoToInclude<CR>                    | " Open file (header-include) under the cursor in a vertical split
 imap <unique>       <S-F3>     <ESC>:vsp <CR>:CxxdGoToInclude<CR>i
 nmap <unique>       <C-F3>     :sp <CR>:CxxdGoToInclude<CR>                     | " Open file (header-include) under the cursor in a horizontal split
@@ -190,6 +194,8 @@ imap <unique>       <F12>      <ESC>:CxxdGoToDefinition<CR>i
 nmap <unique>       <S-F12>    :vsp <CR>:CxxdGoToDefinition<CR>                 | " Jump to symbol definition in a vertical split
 imap <unique>       <S-F12>    <ESC>:vsp <CR>:CxxdGoToDefinition<CR>i
 nmap <unique>       <C-F12>    :sp <CR>:CxxdGoToDefinition<CR>                  | " Jump to symbol definition in a horizontal split
+nmap <unique>       <A-F12>    :CxxdGoToDefinitionInPreview<CR>                 | " Jump to symbol definition (preview window)
+imap <unique>       <A-F12>    <ESC>:CxxdGoToDefinitionInPreview<CR>i
 imap <unique>       <C-F12>    <ESC>:sp <CR>:CxxdGoToDefinition<CR>i
 nmap <unique>       <C-\>s     :CxxdFindAllReferences<CR>                       | " Find all references of symbol under the cursor
 imap <unique>       <C-\>s     <ESC>:CxxdFindAllReferences<CR>i

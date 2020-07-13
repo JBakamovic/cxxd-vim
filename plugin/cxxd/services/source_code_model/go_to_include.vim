@@ -1,9 +1,12 @@
+let s:show_definition_in_preview_window = v:false
+
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#source_code_model#go_to_include#run()
 " Description:  Fetches the filename which include directive corresponds to on the given (current) line.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#source_code_model#go_to_include#run(filename, line)
+function! cxxd#services#source_code_model#go_to_include#run(filename, line, show_definition_in_preview_window)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['go_to_include']['enabled']
+        let s:show_definition_in_preview_window = a:show_definition_in_preview_window
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
         let l:contents_filename = cxxd#utils#pick_content_filename(a:filename)
         if cxxd#utils#is_more_modifications_done(winnr())
@@ -26,7 +29,11 @@ endfunction
 function! cxxd#services#source_code_model#go_to_include#run_callback(status, filename)
     if a:status == v:true
         if a:filename != ''
-            execute('edit ' . a:filename)
+            if s:show_definition_in_preview_window
+                execute('pedit ' . a:filename)
+            else
+                execute('edit ' . a:filename)
+            endif
         else
             echohl WarningMsg | echom 'No corresponding include file found!' | echohl None
         endif

@@ -1,9 +1,12 @@
+let s:show_definition_in_preview_window = v:false
+
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#source_code_model#go_to_definition#run()
 " Description:  Jumps to the definition of a symbol under the cursor.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#source_code_model#go_to_definition#run(filename, line, col)
+function! cxxd#services#source_code_model#go_to_definition#run(filename, line, col, show_definition_in_preview_window)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['go_to_definition']['enabled']
+        let s:show_definition_in_preview_window = a:show_definition_in_preview_window
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
         let l:contents_filename = cxxd#utils#pick_content_filename(a:filename)
         if cxxd#utils#is_more_modifications_done(winnr())
@@ -28,9 +31,14 @@ function! cxxd#services#source_code_model#go_to_definition#run_callback(status, 
     if a:status == v:true
         if a:filename != ''
             if expand('%:p') != a:filename
-                execute('edit ' . a:filename)
+                if s:show_definition_in_preview_window
+                    let l:preview_cmd = 'pedit +normal' . a:line . 'G' . a:column . '| ' . a:filename
+                    execute(l:preview_cmd)
+                else
+                    execute('edit ' . a:filename)
+                    call cursor(a:line, a:column)
+                endif
             endif
-            call cursor(a:line, a:column)
         else
             echohl WarningMsg | echom 'No definition found!' | echohl None
         endif
