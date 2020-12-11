@@ -42,7 +42,7 @@ endfunction
 " Function:     cxxd#services#project_builder#run()
 " Description:  Triggers the build for current project.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#project_builder#run(build_command, ...)
+function! cxxd#services#project_builder#run_custom(build_command, ...)
     if g:cxxd_project_builder['started'] && g:cxxd_project_builder['enabled']
         let l:additional_args = ''
         if a:0 != 0
@@ -54,7 +54,19 @@ function! cxxd#services#project_builder#run(build_command, ...)
             endwhile
         endif
         call setqflist([])
-        python cxxd.api.project_builder_request(server_handle, vim.eval('a:build_command') + ' ' + vim.eval('l:additional_args'))
+        python3 cxxd.api.project_builder_request_build_custom(server_handle, vim.eval('a:build_command') + ' ' + vim.eval('l:additional_args'))
+    endif
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#project_builder#run()
+" Description:  Triggers the build for current project but auto-detects the
+"               build command from cxxd config file.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#services#project_builder#run_target()
+    if g:cxxd_project_builder['started'] && g:cxxd_project_builder['enabled']
+        call setqflist([])
+        python3 cxxd.api.project_builder_request_build_target(server_handle)
     endif
 endfunction
 
