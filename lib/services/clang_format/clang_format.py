@@ -6,10 +6,10 @@ class VimClangFormat(ServicePlugin):
     def __init__(self, servername):
         self.servername = servername
 
-    def startup_callback(self, success, payload):
+    def startup_callback(self, success, payload, startup_payload):
         Utils.call_vim_remote_function(self.servername, "cxxd#services#clang_format#start_callback(" + str(int(success)) + ")")
 
-    def shutdown_callback(self, success, payload):
+    def shutdown_callback(self, success, payload, shutdown_payload):
         reply_with_callback = bool(payload[0])
         if reply_with_callback:
             Utils.call_vim_remote_function(self.servername, "cxxd#services#clang_format#stop_callback(" + str(int(success)) + ")")
