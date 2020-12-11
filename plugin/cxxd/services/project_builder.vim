@@ -1,3 +1,8 @@
+" Variable holding a path to the file which will be containing build output
+let s:cxxd_project_builder_output_build_file = ''
+" Variable that keeps the buffer number of running terminal
+let s:terminal_buf_id = 0
+
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     services#project_builder#start()
 " Description:  Starts the project builder background service.
@@ -10,9 +15,10 @@ endfunction
 " Function:     cxxd#services#project_builder#start_callback()
 " Description:  Callback from services#project_builder#start.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#project_builder#start_callback(status)
+function! cxxd#services#project_builder#start_callback(status, output_build_file)
     if a:status == v:true
         let g:cxxd_project_builder['started'] = 1
+        let s:cxxd_project_builder_output_build_file = a:output_build_file
     else
         echohl WarningMsg | echomsg 'Something went wrong with project-builder service start-up. See Cxxd server log for more details!' | echohl None
     endif
@@ -33,6 +39,7 @@ endfunction
 function! cxxd#services#project_builder#stop_callback(status)
     if a:status == v:true
         let g:cxxd_project_builder['started'] = 0
+        let s:cxxd_project_builder_output_build_file = ''
     else
         echohl WarningMsg | echomsg 'Something went wrong with project-builder service shut-down. See Cxxd server log for more details!' | echohl None
     endif
@@ -67,6 +74,8 @@ function! cxxd#services#project_builder#run_target()
     if g:cxxd_project_builder['started'] && g:cxxd_project_builder['enabled']
         call setqflist([])
         python3 cxxd.api.project_builder_request_build_target(server_handle)
+        let s:terminal_buf_id = term_start('tail -f ' . s:cxxd_project_builder_output_build_file)
+        wincmd J | below
     endif
 endfunction
 
@@ -77,6 +86,7 @@ endfunction
 function! cxxd#services#project_builder#run_callback(status, duration, build_process_exit_code, build_output)
     if a:status == v:true
         echomsg 'Build process took ' . a:duration ". ' with exit code ' . a:build_process_exit_code
+        execute('bdelete! ' . s:terminal_buf_id)
         execute('cgetfile ' . a:build_output)
         execute('copen')
         redraw

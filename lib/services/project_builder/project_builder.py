@@ -7,7 +7,8 @@ class VimProjectBuilder(ServicePlugin):
         self.servername = servername
 
     def startup_callback(self, success, payload, startup_payload):
-        Utils.call_vim_remote_function(self.servername, "cxxd#services#project_builder#start_callback(" + str(int(success)) + ")")
+        output_build_file = str(startup_payload[0])
+        Utils.call_vim_remote_function(self.servername, "cxxd#services#project_builder#start_callback(" + str(int(success)) + ", '" + output_build_file + "')")
 
     def shutdown_callback(self, success, payload, shutdown_payload):
         reply_with_callback = bool(payload[0])
