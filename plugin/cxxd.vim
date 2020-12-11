@@ -131,7 +131,8 @@ augroup END
 :command                        CxxdRebuildIndex                      :call cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
 :command                        CxxdAnalyzerClangTidyBuf              :call cxxd#services#clang_tidy#run(expand('%:p'), v:false)
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
-:command -nargs=+               CxxdBuildRun                          :call cxxd#services#project_builder#run(<f-args>)
+:command                        CxxdBuildRun                          :call cxxd#services#project_builder#run_target()
+:command -nargs=+               CxxdBuildRunWithParams                :call cxxd#services#project_builder#run_custom(<f-args>)
 
 "
 " TODO
@@ -160,7 +161,8 @@ nmap <unique>       <F5>       :CxxdAnalyzerClangTidyBuf<CR>                    
 imap <unique>       <F5>       <ESC>:CxxdAnalyzerClangTidyBuf<CR>i
 nmap <unique>       <S-F5>     :CxxdAnalyzerClangTidyApplyFixesBuf<CR>          | " Run clang-tidy over current buffer (apply fixes)
 imap <unique>       <S-F5>     <ESC>:CxxdAnalyzerClangTidyApplyFixesBuf<CR>i
-
+nmap <unique>       <F9>       :CxxdBuildRun<CR>                                | " Build project by auto-detecting build command provided by cxxd config file
+imap <unique>       <F9>       <ESC>:CxxdBuildRun<CR>i
 
 "
 " Important to be set to a much lower value than a default one (=4000) because some
