@@ -21,4 +21,7 @@ hi def link CxxdMacroInstantiation         MacroInstantiationTag
 hi def link CxxdTypedef                    TypedefTag
 hi def link CxxdUsingDirective             UsingDirectiveTag
 hi def link CxxdUsingDeclaration           UsingDeclarationTag
-
+hi def link QfPreview                      Pmenu
+hi def link QfPreviewTitle                 Pmenu
+hi def link QfPreviewScrollbar             PmenuSbar
+hi def link QfPreviewThumb                 PmenuThumb

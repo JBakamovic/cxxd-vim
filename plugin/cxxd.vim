@@ -98,11 +98,23 @@ let g:cxxd_clang_tidy           = {
 \                                   'config'  : '.clang-tidy'
 \}
 
+let g:cxxd_iwyu                 = {
+\                                   'enabled' : 1,
+\                                   'started' : 0,
+\}
+
+let g:cxxd_disassembly          = {
+\                                   'enabled' : 1,
+\                                   'started' : 0,
+\}
+
 let g:cxxd_available_services   = [
 \                                   g:cxxd_src_code_model,
 \                                   g:cxxd_project_builder,
 \                                   g:cxxd_clang_format,
 \                                   g:cxxd_clang_tidy,
+\                                   g:cxxd_iwyu,
+\                                   g:cxxd_disassembly,
 \]
 
 
@@ -117,9 +129,9 @@ augroup END
 
 augroup cxxd_handle_window_specific_vars
     autocmd!
-    autocmd TextChangedI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp  call cxxd#utils#modifications_handler_i(winnr())
-    autocmd TextChangedP             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp call cxxd#utils#modifications_handler_p(winnr())
-    autocmd CursorHold,CursorHoldI   *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp call cxxd#utils#modifications_handler(winnr()) | call cxxd#utils#viewport_handler(winnr(), line('w0'), line('w$'))
+    autocmd TextChangedI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic  call cxxd#utils#modifications_handler_i(winnr())
+    autocmd TextChangedP             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic call cxxd#utils#modifications_handler_p(winnr())
+    autocmd CursorHold,CursorHoldI   *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic call cxxd#utils#modifications_handler(winnr()) | call cxxd#utils#viewport_handler(winnr(), line('w0'), line('w$'))
 augroup END
 
 augroup cxxd_source_code_model_indexer
@@ -129,32 +141,32 @@ augroup END
 
 augroup cxxd_source_code_model_auto_completion
     autocmd!
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.')-1)
-    autocmd TextChangedP            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.')-1)
-    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#auto_completion#cache_warmup(expand('%:p'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.')-1)
+    autocmd TextChangedP            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   call cxxd#services#source_code_model#auto_completion#run(expand('%:p'), line('.'), col('.')-1)
+    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   call cxxd#services#source_code_model#auto_completion#cache_warmup(expand('%:p'))
 augroup END
 
 augroup cxxd_source_code_model_diagnostics
     autocmd!
     "autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
     "autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
-    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   if !empty(v:completed_item) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
-    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
-    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
+    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   if !empty(v:completed_item) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
+    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
+    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
 augroup END
 
 " TODO CursorHoldI cxxd#utils#statement_finished must go after is_more_modifications_done().
 " Otherwise, we will not end up updating the syn-hl when scrolling the window in INSERT mode.
 augroup cxxd_source_code_model_semantic_syntax_highlight
     autocmd!
-    autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
-    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   if !empty(v:completed_item) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
+    autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
+    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   if !empty(v:completed_item) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
 augroup END
 
 augroup cxxd_clang_format
     autocmd!
-    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp   call cxxd#services#clang_format#run(expand('%:p'))
+    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx,*.tpp,*.ic   call cxxd#services#clang_format#run(expand('%:p'))
 augroup END
 
 "
@@ -177,6 +189,10 @@ augroup END
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
 :command                        CxxdBuildRun                          :call cxxd#services#project_builder#run_target()
 :command -nargs=+               CxxdBuildRunWithParams                :call cxxd#services#project_builder#run_custom(<f-args>)
+:command -nargs=+ -complete=dir CxxdIwyuDir                           :call cxxd#services#iwyu#run(<f-args>, v:false)
+:command                        CxxdIwyuBuf                           :call cxxd#services#iwyu#run(expand('%:p'), v:false)
+:command                        CxxdIwyuApplyFixesBuf                 :call cxxd#services#iwyu#run(expand('%:p'), v:true)
+:command                        CxxdDisassemblyBuf                    :call cxxd#services#disassembly#run(expand('%:p'), line('.'))
 
 "
 " Cxxd default-provided key mappings

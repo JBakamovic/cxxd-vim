@@ -88,10 +88,10 @@ class VimCodeCompletion(ServicePlugin):
         logging.error("Unable to map AST node id '{0}' to available Vim kinds!".format(ast_node_id))
         return ''
 
-    def startup_callback(self, success, payload):
+    def startup_callback(self, success, payload, startup_payload):
         Utils.call_vim_remote_function(self.servername, "cxxd#services#source_code_model#auto_completion#start_callback(" + str(int(success)) + ")")
 
-    def shutdown_callback(self, success, payload):
+    def shutdown_callback(self, success, payload, shutdown_payload):
         reply_with_callback = bool(payload[0])
         if reply_with_callback:
             Utils.call_vim_remote_function(self.servername, "cxxd#services#source_code_model#auto_completion#stop_callback(" + str(int(success)) + ")")
