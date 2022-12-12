@@ -61,6 +61,7 @@ function! cxxd#services#clang_format#run_callback(status, filename)
         let l:current_buffer = expand('%:p')
         if l:current_buffer == a:filename
             execute('e')
+            execute('checktime')
         endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with clang-format service. See Cxxd server log for more details!' | echohl None
