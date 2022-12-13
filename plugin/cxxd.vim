@@ -151,6 +151,8 @@ nmap <unique>       <A-F3>     :CxxdGoToIncludeInPreview<CR>                    
 imap <unique>       <A-F3>     <ESC>:CxxdGoToIncludeInPreview<CR>i
 nmap <unique>       <S-F3>     :vsp <CR>:CxxdGoToInclude<CR>                    | " Open file (header-include) under the cursor in a vertical split
 imap <unique>       <S-F3>     <ESC>:vsp <CR>:CxxdGoToInclude<CR>i
+nmap <unique>       <C-F3>     :sp <CR>:CxxdGoToInclude<CR>                     | " Open file (header-include) under the cursor in a horizontal split
+imap <unique>       <C-F3>     <ESC>:sp <CR>:CxxdGoToInclude<CR>i
 nmap <unique>       <F12>      :CxxdGoToDefinition<CR>                          | " Jump to symbol definition
 imap <unique>       <F12>      <ESC>:CxxdGoToDefinition<CR>i
 nmap <unique>       <S-F12>    :vsp <CR>:CxxdGoToDefinition<CR>                 | " Jump to symbol definition in a vertical split
