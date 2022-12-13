@@ -94,6 +94,13 @@ augroup cxxd_init_deinit
     autocmd VimEnter,WinEnter       *                                           call cxxd#utils#init_window_specific_vars()
 augroup END
 
+augroup cxxd_handle_window_specific_vars
+    autocmd!
+    autocmd TextChangedI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler_i(winnr())
+    autocmd TextChangedP             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler_p(winnr())
+    autocmd CursorHold,CursorHoldI   *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx  call cxxd#utils#modifications_handler(winnr()) | call cxxd#utils#viewport_handler(winnr(), line('w0'), line('w$'))
+augroup END
+
 augroup cxxd_source_code_model_indexer
     autocmd!
     autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#indexer#run_on_single_file(expand('%:p'))
@@ -102,13 +109,13 @@ augroup END
 augroup cxxd_source_code_model_diagnostics
     autocmd!
     autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
 augroup END
 
 augroup cxxd_source_code_model_semantic_syntax_highlight
     autocmd!
     autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
-    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
 augroup END
 
 augroup cxxd_clang_format

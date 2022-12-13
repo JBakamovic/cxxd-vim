@@ -39,7 +39,9 @@ endfunction
 function! cxxd#services#source_code_model#indexer#run_on_directory_callback(status)
     if a:status == v:true
         echomsg 'Indexing successfully completed.'
-        call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc'])
+        call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(
+\           g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc']
+\       )
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-run-on-directory) service. See Cxxd server log for more details!' | echohl None
     endif
@@ -104,7 +106,17 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#find_all_references(filename, line, col)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python cxxd.api.source_code_model_indexer_find_all_references_request(server_handle, vim.eval('a:filename'), vim.eval('a:line'), vim.eval('a:col'))
+        " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
+        let l:contents_filename = cxxd#utils#pick_content_filename(a:filename)
+        if cxxd#utils#is_more_modifications_done(winnr())
+            call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
+        endif
+        python cxxd.api.source_code_model_indexer_find_all_references_request(
+\           server_handle,
+\           vim.eval('l:contents_filename'),
+\           vim.eval('a:line'),
+\           vim.eval('a:col')
+\       )
     endif
 endfunction
 

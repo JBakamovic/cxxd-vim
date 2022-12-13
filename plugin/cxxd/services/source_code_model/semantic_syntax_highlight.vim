@@ -5,9 +5,8 @@
 function! cxxd#services#source_code_model#semantic_syntax_highlight#run(filename)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['semantic_syntax_highlight']['enabled']
         " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
-        let l:contents_filename = a:filename
-        if getbufvar(a:filename, '&modified')
-            let l:contents_filename = '/tmp/tmp_' . fnamemodify(a:filename, ':p:t')
+        let l:contents_filename = cxxd#utils#pick_content_filename(a:filename)
+        if cxxd#utils#is_more_modifications_done(winnr())
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
         endif
 
@@ -20,7 +19,7 @@ function! cxxd#services#source_code_model#semantic_syntax_highlight#run(filename
             python cxxd.api.source_code_model_semantic_syntax_highlight_request(
 \ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
 \ 	        )
-        elseif cxxd#utils#is_viewport_changed(winnr(), l:current_visible_line_begin, l:current_visible_line_end)
+        elseif cxxd#utils#is_viewport_changed(winnr())
             python cxxd.api.source_code_model_semantic_syntax_highlight_request(
 \ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
 \ 	        )
