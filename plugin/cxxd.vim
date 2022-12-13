@@ -28,6 +28,18 @@ let g:loaded_cxxdvim = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
+"
+" Cxxd code-completion sorting strategies
+"   Code-completion candidates may be sorted with different strategies:
+"       (1) By priority (which is given & deduced by Clang code-completion engine).
+"       (2) By symbol kind (same symbol kinds will be grouped together; e.g. functions, variables, methods, etc.).
+"       (3) Alphabetically.
+"
+let g:cxxd_code_completion_sorting_strategies = {
+\                                                   'priority'  : 0,
+\                                                   'kind'      : 1,
+\                                                   'alphabet'  : 2,
+\}
 
 "
 " Cxxd fetch-all-diagnostics sorting strategies
@@ -57,7 +69,16 @@ let g:cxxd_src_code_model       = {
 \                                       'type_deduction'            : { 'enabled' : 1 },
 \                                       'go_to_definition'          : { 'enabled' : 1 },
 \                                       'go_to_include'             : { 'enabled' : 1 },
+\                                       'code_completion'           : {
+\                                                                       'enabled' : 1,
+\                                                                       'sorting_strategy' : g:cxxd_code_completion_sorting_strategies['priority'],
+\                                       }
 \                                   }
+\}
+
+let g:cxxd_code_completion      = {
+\                                   'enabled' : 1,
+\                                   'started' : 0,
 \}
 
 let g:cxxd_project_builder      = {
@@ -106,16 +127,25 @@ augroup cxxd_source_code_model_indexer
     autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#indexer#run_on_single_file(expand('%:p'))
 augroup END
 
+augroup cxxd_code_completion
+    autocmd!
+    autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#code_completion#run(expand('%:p'), line('.'), col('.')-1)
+    autocmd TextChangedP            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#code_completion#run(expand('%:p'), line('.'), col('.')-1)
+    autocmd BufEnter                *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#code_completion#cache_warmup(expand('%:p'))
+augroup END
+
 augroup cxxd_source_code_model_diagnostics
     autocmd!
     autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#diagnostics#run(expand('%:p'))
     autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
+    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if !empty(v:completed_item) | call cxxd#services#source_code_model#diagnostics#run(expand('%:p')) | endif
 augroup END
 
 augroup cxxd_source_code_model_semantic_syntax_highlight
     autocmd!
     autocmd CursorHold              *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p'))
     autocmd CursorHoldI             *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if cxxd#utils#statement_finished(getline('.')[0:(col('.')+1)]) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
+    autocmd CompleteDone            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   if !empty(v:completed_item) | call cxxd#services#source_code_model#semantic_syntax_highlight#run(expand('%:p')) | endif
 augroup END
 
 augroup cxxd_clang_format
@@ -138,6 +168,7 @@ augroup END
 :command                        CxxdFetchAllDiagnosticsBySeverityDesc :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc'])
 :command                        CxxdFetchAllDiagnosticsByAlphabet     :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['filename'])
 :command                        CxxdRebuildIndex                      :call cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
+:command                        CxxdCodeCompletion                    :call cxxd#services#code_completion#run_i(expand('%:p'), line('.'), col('.'))
 :command                        CxxdAnalyzerClangTidyBuf              :call cxxd#services#clang_tidy#run(expand('%:p'), v:false)
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
 :command                        CxxdBuildRun                          :call cxxd#services#project_builder#run_target()
@@ -172,6 +203,7 @@ nmap <unique>       <C-\>s     :CxxdFindAllReferences<CR>                       
 imap <unique>       <C-\>s     <ESC>:CxxdFindAllReferences<CR>i
 nmap <unique>       <C-\>d     :CxxdFetchAllDiagnosticsBySeverityDesc<CR>       | " Fetch all diagnostics sorted by severity descending
 imap <unique>       <C-\>d     <ESC>:CxxdFetchAllDiagnosticsBySeverityDesc<CR>i
+imap <unique>       <C-space>  <ESC>:CxxdCodeCompletion<CR>a                    | " Trigger code-completion
 nmap <unique>       <C-\>r     :CxxdRebuildIndex<CR>                            | " Rebuild symbol database index for current project
 imap <unique>       <C-\>r     <ESC>:CxxdRebuildIndex<CR>i
 nmap <unique>       <F5>       :CxxdAnalyzerClangTidyBuf<CR>                    | " Run clang-tidy over current buffer (do not apply fixes)
@@ -183,7 +215,7 @@ imap <unique>       <F9>       <ESC>:CxxdBuildRun<CR>i
 
 "
 " Important to be set to a much lower value than a default one (=4000) because some
-" services act upon 'CursorHoldI' event. I.e. semantic syntax highlighting and diagnostics.
+" services act upon 'CursorHoldI' event. I.e. semantic syntax highlighting, diagnostics and code completion.
 "
 set updatetime=250
 

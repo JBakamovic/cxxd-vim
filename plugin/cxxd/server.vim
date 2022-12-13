@@ -58,6 +58,7 @@ function! cxxd#server#start_all_services()
     call cxxd#services#clang_tidy#start()
     call cxxd#services#clang_format#start()
     call cxxd#services#project_builder#start()
+    call cxxd#services#code_completion#start()
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -69,4 +70,5 @@ function! cxxd#server#stop_all_services(subscribe_for_shutdown_callback)
     call cxxd#services#clang_tidy#stop(a:subscribe_for_shutdown_callback)
     call cxxd#services#clang_format#stop(a:subscribe_for_shutdown_callback)
     call cxxd#services#project_builder#stop(a:subscribe_for_shutdown_callback)
+    call cxxd#services#code_completion#stop(a:subscribe_for_shutdown_callback)
 endfunction
