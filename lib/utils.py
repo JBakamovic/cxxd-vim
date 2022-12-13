@@ -9,7 +9,7 @@ file_type_dict = {
 class Utils():
     @staticmethod
     def file_type_to_programming_language(file_type):
-        for lang, file_types in file_type_dict.iteritems():
+        for lang, file_types in file_type_dict.items():
             if file_type in file_types:
                 return lang
         return ''
@@ -35,7 +35,7 @@ class Utils():
             s.bind(('localhost', port))
             s.close()
             return True
-        except socket.error, msg:
+        except socket.error as msg:
             s.close()
             return False
 

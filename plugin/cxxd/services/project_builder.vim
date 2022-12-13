@@ -8,7 +8,7 @@ let s:terminal_buf_id = 0
 " Description:  Starts the project builder background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#project_builder#start()
-    python cxxd.api.project_builder_start(server_handle)
+    python3 cxxd.api.project_builder_start(server_handle)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -29,7 +29,7 @@ endfunction
 " Description:  Stops the project builder background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#project_builder#stop(subscribe_for_shutdown_callback)
-    python cxxd.api.project_builder_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    python3 cxxd.api.project_builder_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

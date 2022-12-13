@@ -11,7 +11,7 @@ else
             \ echohl None
         call feedkeys("\<CR>")
         finish
-    elseif !has("python")
+    elseif !has("python3")
         echohl WarningMsg |
             \ echoerr "cxxd-vim requires (G)Vim compiled with 'python' feature." |
             \ echohl None
@@ -173,12 +173,6 @@ augroup END
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
 :command                        CxxdBuildRun                          :call cxxd#services#project_builder#run_target()
 :command -nargs=+               CxxdBuildRunWithParams                :call cxxd#services#project_builder#run_custom(<f-args>)
-
-"
-" TODO
-"       add license on top
-"       add license file?
-"
 
 "
 " Cxxd default-provided key mappings

@@ -1,7 +1,7 @@
 import logging
 from utils import Utils
 
-class VimGoToDefinition():
+class VimGoToDefinition:
     def __init__(self, servername):
         self.servername = servername
 

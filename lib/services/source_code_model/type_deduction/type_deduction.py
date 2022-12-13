@@ -1,7 +1,7 @@
 import logging
 from utils import Utils
 
-class VimTypeDeduction():
+class VimTypeDeduction:
     def __init__(self, servername):
         self.servername = servername
 

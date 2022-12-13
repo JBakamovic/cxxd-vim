@@ -7,7 +7,7 @@ function! cxxd#services#source_code_model#start()
     if g:cxxd_src_code_model['services']['type_deduction']['enabled']
         set ballooneval balloonexpr=cxxd#services#source_code_model#type_deduction#run()
     endif
-    python cxxd.api.source_code_model_start(server_handle)
+    python3 cxxd.api.source_code_model_start(server_handle)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -28,7 +28,7 @@ endfunction
 " Description:  Stops the source code model background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#stop(subscribe_for_shutdown_callback)
-    python cxxd.api.source_code_model_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    python3 cxxd.api.source_code_model_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

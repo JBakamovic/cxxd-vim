@@ -3,10 +3,10 @@
 " Description:  Function which serializes current buffer contents to the given filename.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#serialize_current_buffer_contents(to_filename)
-python << EOF
+python3 << EOF
 import vim
-temp_file = open(vim.eval('a:to_filename'), "w", 0)
-temp_file.writelines(line + '\n' for line in vim.current.buffer)
+with open(vim.eval('a:to_filename'), "w") as f:
+    f.writelines(line + '\n' for line in vim.current.buffer)
 EOF
 endfunction
 
@@ -93,31 +93,31 @@ function! cxxd#utils#viewport_handler(winnr, current_visible_line_begin, current
 
     " Because we are missing a proper event support in Vim, we are using a 'CursorHold(I)' event context
     " to emulate 'ViewportChanged' event. We just need to filter out unnecessary 'CursorHold' events ...
-	" 	1. CursorHold(I) events can be triggered by moving the cursor horizontally
-	" 		* In which case we will report back that viewport
-    " 		  hasn't been changed
-	" 	2. CursorHold(I) events can be triggered by moving cursor vertically
-	" 	   but not enough to change the viewport (i.e. moving cursor across
-	" 	   the lines but without changing the first and last line visible
-    " 	   in the given window)
-	" 	   	* In which case we will still report back that viewport
-	" 	   	  hasn't been changed
-	" 	3. CursorHold(I) events can be triggered by moving cursor vertically
-	" 	   but this time enough to impact the viewport (i.e. move
-	" 	   cursor upwards when we are at the top of the viewport or
-	" 	   move cursor downwards when we are the bottom of the
-	" 	   viewport)
-	" 	   	* In which case we will report back that viewport
-	" 	   	  has been changed
-	let l:viewport_changed = v:false
-	if a:current_visible_line_begin != l:previous_visible_line_begin
+    "   1. CursorHold(I) events can be triggered by moving the cursor horizontally
+    "       * In which case we will report back that viewport
+    "         hasn't been changed
+    "   2. CursorHold(I) events can be triggered by moving cursor vertically
+    "      but not enough to change the viewport (i.e. moving cursor across
+    "      the lines but without changing the first and last line visible
+    "      in the given window)
+    "       * In which case we will still report back that viewport
+    "         hasn't been changed
+    "   3. CursorHold(I) events can be triggered by moving cursor vertically
+    "      but this time enough to impact the viewport (i.e. move
+    "      cursor upwards when we are at the top of the viewport or
+    "      move cursor downwards when we are the bottom of the
+    "      viewport)
+    "       * In which case we will report back that viewport
+    "         has been changed
+    let l:viewport_changed = v:false
+    if a:current_visible_line_begin != l:previous_visible_line_begin
         call setwinvar(a:winnr, 'previous_visible_line_begin', a:current_visible_line_begin)
-		let l:viewport_changed = v:true
-	endif
-	if a:current_visible_line_end != l:previous_visible_line_end
+        let l:viewport_changed = v:true
+    endif
+    if a:current_visible_line_end != l:previous_visible_line_end
         call setwinvar(a:winnr, 'previous_visible_line_end', a:current_visible_line_end)
-		let l:viewport_changed = v:true
-	endif
+        let l:viewport_changed = v:true
+    endif
     call setwinvar(a:winnr, 'viewport_changed', l:viewport_changed)
 endfunction
 

@@ -4,7 +4,7 @@ import tempfile
 from cxxd.services.source_code_model.indexer.clang_indexer import SourceCodeModelIndexerRequestId
 from utils import Utils
 
-class VimIndexer(object):
+class VimIndexer:
     def __init__(self, servername):
         self.servername = servername
         self.find_all_references_output = os.path.join(tempfile.gettempdir(), self.servername + 'find_all_references')
@@ -59,7 +59,7 @@ class VimIndexer(object):
                 "'text': '" + context.replace("'", r"''").rstrip() + "'}"
             )
 
-        with open(self.find_all_references_output, 'w', 0) as f:
+        with open(self.find_all_references_output, 'w') as f:
             f.writelines(', '.join(item for item in quickfix_list))
 
         Utils.call_vim_remote_function(
@@ -99,7 +99,7 @@ class VimIndexer(object):
                 "'text': '" + description.replace("'", r"''").rstrip() + "'}"
             )
 
-        with open(self.fetch_all_diagnostics_output, 'w', 0) as f:
+        with open(self.fetch_all_diagnostics_output, 'w') as f:
             f.writelines(', '.join(item for item in quickfix_list))
 
         Utils.call_vim_remote_function(

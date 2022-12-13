@@ -3,7 +3,7 @@
 " Description:  Starts the source code formatting background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_format#start()
-    python cxxd.api.clang_format_start(server_handle)
+    python3 cxxd.api.clang_format_start(server_handle)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -24,7 +24,7 @@ endfunction
 " Dependency:
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_format#stop(subscribe_for_shutdown_callback)
-    python cxxd.api.clang_format_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    python3 cxxd.api.clang_format_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -45,7 +45,7 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_format#run(filename)
     if g:cxxd_clang_format['started'] && g:cxxd_clang_format['enabled']
-        python cxxd.api.clang_format_request(server_handle, vim.eval('a:filename'))
+        python3 cxxd.api.clang_format_request(server_handle, vim.eval('a:filename'))
     endif
 endfunction
 

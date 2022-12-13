@@ -4,12 +4,12 @@ import os
 from utils import Utils
 from cxxd.service_plugin import ServicePlugin
 from cxxd.services.source_code_model_service import SourceCodeModelSubServiceId
-from indexer.indexer import VimIndexer
-from semantic_syntax_highlight.semantic_syntax_highlight import VimSemanticSyntaxHighlight
-from diagnostics.diagnostics import VimDiagnostics
-from type_deduction.type_deduction import VimTypeDeduction
-from go_to_definition.go_to_definition import VimGoToDefinition
-from go_to_include.go_to_include import VimGoToInclude
+from . indexer.indexer import VimIndexer
+from . semantic_syntax_highlight.semantic_syntax_highlight import VimSemanticSyntaxHighlight
+from . diagnostics.diagnostics import VimDiagnostics
+from . type_deduction.type_deduction import VimTypeDeduction
+from . go_to_definition.go_to_definition import VimGoToDefinition
+from . go_to_include.go_to_include import VimGoToInclude
 
 class VimSourceCodeModel(ServicePlugin):
     def __init__(self, servername):
