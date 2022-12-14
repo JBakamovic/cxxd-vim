@@ -124,7 +124,13 @@ augroup END
 
 augroup cxxd_source_code_model_indexer
     autocmd!
-    autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#indexer#run_on_single_file(expand('%:p'))
+    " Keeping the index of freshly modified file up to date is currently wired
+    " through the clang-format callback. This way a racey condition between the
+    " clang-format and source-code-indexer is addressed at the cost of less robust
+    " solution. In future, there might be a logic implemented on the frontend side
+    " which will, depending on the clang-format configuration, deduce whether or
+    " not to send an indexer request to cxxd. See commit message for more details.
+    "autocmd BufWritePost            *.cpp,*.cxx,*.cc,*.c,*.h,*.hh,*.hpp,*.hxx   call cxxd#services#source_code_model#indexer#run_on_single_file(expand('%:p'))
 augroup END
 
 augroup cxxd_code_completion
