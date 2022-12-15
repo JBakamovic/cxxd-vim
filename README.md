@@ -6,11 +6,7 @@
   * [Manual](#manual)
 * [Features](#features)
 * [Supported platforms](#supported-platforms)
-* [Configuration](#configuration)
-  * [JSON Compilation Database](#json-compilation-database)
-  * [Plain txt file](#plain-txt-file)
-* [Extra configuration](#extra-configuration)
-  * [An example configuration](#an-example-configuration)
+* [Getting started](#getting-started)
 * [Colorschemes](#colorschemes)
 * [Usage](#usage)
 * [Screenshots](#screenshots)
@@ -56,120 +52,11 @@ If you're not using any of the plugin managers, you can simply clone the reposit
 
 [Here](https://github.com/JBakamovic/cxxd/blob/master/README.md#supported-platforms)
 
-# Configuration
-Your project **must** provide either of the following:
-* [JSON Compilation Database](#json-compilation-database) **or**
-* a simple [plain txt file](#plain-txt-file)
+# Getting started
 
-In case it doesn't, `cxxd` server will not have enough details to provide quality service and therefore it will bail-out during the startup.
+You need to provide [`.cxxd_config.json`](https://github.com/JBakamovic/cxxd#configuration) file at the root of your source code repository. You will also need to generate a [compilation database](https://github.com/JBakamovic/cxxd#compilation-database).
 
-## What directory do you put these files in?
-
-If you don't provide any [extra configuration](#extra-configuration), `cxxd` will try to auto-magically detect the location of either of those files during its startup. This is only a convenience and ok to get you going but recommended method for non-trivial projects is to explicitly provide this setting through this extra configuration file (`.cxxd_config.json`).
-
-For example, many projects will have different build-targets (`Debug` vs. `Release` vs. etc.) and that automatically implies that there will be multiple JSON compilation databases, each for one build target. In order for `cxxd` be able to process that information, we need to express this through `.cxxd_config.json`. See [extra configuration](#extra-configuration) section on more details.
-
-## JSON Compilation Database
-
-### `CMake`/`ninja` projects
-
-Run `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON <path_to_your_source_root_dir>`.
-
-To automate this step and make sure that compilation database is always up-to-date, one can integrate it into the `CMakeLists.txt` by `set(CMAKE_EXPORT_COMPILE_COMMANDS ON)`.
-
-### Non-`CMake`/`ninja` projects
-
-Consult the documentation of your build system and have a look if it supports the generation of JSON compilation databases. If it doesn't then:
-* Use [Bear](https://github.com/rizsotto/Bear) or
-* Fallback to creating a [plain txt file](#plain-txt-file) yourself.
-
-## Plain txt file
-
-This file **must** be named `compile_flags.txt` and shall contain one compiler flag per each line. E.g.
-```
--I./lib
--I./include
--DFEATURE_XX
--DFEATURE_YY
--Wall
--Werror
-```
-
-# Extra configuration
-
-It is possible to provide an extra (**optional**) configuration via `.cxxd_config.json` file which can be used to provide project-specific settings for things such as:
-1. Defining arbitrary number of build-configurations you want to run `cxxd` with.
-  * I.e. `Debug` vs. `Release` vs `RelWithDbgInfo` vs. `WhateverYouHaveInYourProject`
-  * This is important if you want `cxxd` server to understand the differences between different build-configurations.
-    * E.g. This setting will basically impact the whole underlying source-code-model `cxxd` is using, which means that everything from indexing to code-completion and symbol-resolution is going to be (rightly) affected.
-  * Much much more details can be found at [this commit](https://github.com/JBakamovic/cxxd/commit/06d2743cb11fb4c89e69314f60b7e599e2040aef).
-  * For a quickstart how to make use of this feature have a look at the `configuration` section in the underlying example configuration.
-2. Skipping certain directories during the indexer operation.
-  * I.e. this is handy if you don't want to index directories from build-system artifacts, external dependencies and alike.
-    * This will generally result in better performance of indexer.
-3. Defining non-standard C and C++ file extensions your project might be using (e.g. '.tcc', '.txx', '.whatever').
-  * This is important if you want to get precise indexer operations (e.g. `find-all-references`) because it instructs
-    the indexer to index those files as well.
-4. Configuring clang-tidy by providing *whatever* arguments it supports.
-5. Configuring clang-format by providing *whatever* arguments it supports.
-6. Configuring build-system you use by providing *whatever* arguments it supports.
-7. Selecting specific clang-tidy executable.
- * Useful if you don't want to use system-wide available clang-tidy executable (default).
-8. Selecting specific clang-format executable.
- * Useful if you don't want to use system-wide available clang-format executable (default).
-
-File is expected to exist at the root of the project directory. How to write one see next section.
-
-## An example configuration
-
-This is how it *may* look like but it all depends on your personal and project preferences.
-
-```
-{
-    "configuration" : {
-        "type" : "compilation-database",
-        "compilation-database" : {
-            "target" : {
-                "debug" : "../debug_build",
-                "release" : "../release_build",
-                "relwithdbginfo" : "../relwithdbginfo_build"
-            }
-        }
-    },
-    "indexer" : {
-        "exclude-dirs" : [
-            "cmake",
-            "CMakeFiles",
-            "external"
-        ],
-        "extra-file-extensions" : [
-            ".tcc",
-            ".txx"
-        ]
-    },
-    "clang-tidy" : {
-        "binary" : "/opt/clang+llvm-5.0.1-x86_64-linux-gnu/bin/clang-tidy",
-        "args" : {
-            "-analyze-temporary-dtors" : true,
-            "-explain-config" : false,
-            "-format-style" : "llvm"
-        }
-    },
-    "clang-format" : {
-        "binary" : "/opt/clang+llvm-5.0.1-x86_64-linux-gnu/bin/clang-format",
-        "args" : {
-            "-sort-includes" : true,
-            "-verbose" : true,
-            "-style" : "llvm"
-        }
-    },
-    "project-builder" : {
-        "args" : {
-            "--verbose" : true
-        }
-    }
-}
-```
+You can use [`.cxxd_config.json` example configuration](https://github.com/JBakamovic/cxxd#example-of-configuration) and tweak it to your needs.
 
 # Colorschemes
 
