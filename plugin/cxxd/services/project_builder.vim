@@ -72,9 +72,11 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#project_builder#run_target()
     if g:cxxd_project_builder['started'] && g:cxxd_project_builder['enabled']
-        call setqflist([])
+        call setqflist(getqflist(), 'f')
         python3 cxxd.api.project_builder_request_build_target(server_handle)
-        let s:terminal_buf_id = term_start('tail -f ' . s:cxxd_project_builder_output_build_file)
+        let s:buf_nr = bufnr('build_log', 1)
+        let s:log_job = job_start('tail -f ' . s:cxxd_project_builder_output_build_file, {'out_io': 'buffer', 'out_buf': s:buf_nr})
+        sbuf build_log
         wincmd J | below
     endif
 endfunction
@@ -84,14 +86,11 @@ endfunction
 " Description:  Callback from services#project_builder#run.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#project_builder#run_callback(status, duration, build_process_exit_code, build_output)
-    if a:status == v:true
-        echomsg 'Build process took ' . a:duration ". ' with exit code ' . a:build_process_exit_code
-        execute('bdelete! ' . s:terminal_buf_id)
-        execute('cgetfile ' . a:build_output)
-        execute('copen')
-        redraw
-    else
-        echohl WarningMsg | echomsg 'Something went wrong with project-builder service. See Cxxd server log for more details!' | echohl None
-    endif
+    echomsg 'Build process took ' . a:duration . ' with exit code ' . a:build_process_exit_code
+    call job_stop(s:log_job)
+    execute('bdelete! ' . s:buf_nr)
+    execute('cgetfile ' . a:build_output)
+    execute('copen')
+    redraw
 endfunction
 
