@@ -153,3 +153,168 @@ function! cxxd#utils#statement_finished(str)
     let l:last_char = a:str[len(a:str)-1]
     return l:last_char == ';' || l:last_char == '}'
 endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#utils#preview_open
+" Description:  Open given filename at given (line, column) position in a pop-up floating window.
+"               I scraped this impl somewhere from the web and tweaked a bit to accomodate my case
+"               but can't remember exactly from where. Will give it credit if I do.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#utils#preview_open(filename, line, column)
+    let bufnr = bufadd(a:filename)
+    let wininfo = getwininfo(win_getid())[0]
+    let space_above = &lines - line('.') + 1
+    let space_below = line('.')
+    let lnum = a:line
+    let firstline = a:line - s:preview_win_get('offset') < 1 ? 1 : a:line - s:preview_win_get('offset')
+    let height = s:preview_win_get('height')
+
+    let title = a:filename
+
+    " Truncate long titles at beginning
+    if len(title) > wininfo.width
+        let title = '…' .. title[-(wininfo.width-4):]
+    endif
+
+    if space_above > height
+        if space_above == height + 1
+            let height = height - 1
+        endif
+        let opts = {
+                \ 'line': 'cursor-1',
+                \ 'pos': 'botleft'
+                \ }
+    elseif space_below >= height
+        let opts = {
+                \ 'line': 'cursor+1',
+                \ 'pos': 'topleft'
+                \ }
+    elseif space_above > 5
+        let height = space_above - 2
+        let opts = {
+                \ 'line': 'cursor',
+                \ 'pos': 'botleft'
+                \ }
+    elseif space_below > 5
+        let height = space_below - 2
+        let opts = {
+                \ 'line': 'cursor'
+                \ 'pos': 'topleft'
+                \ }
+    elseif space_above <= 5 || space_below <= 5
+        let opts = {
+                \ 'line': &lines - &cmdheight,
+                \ 'pos': 'botleft'
+                \ }
+    else
+        echohl ErrorMsg
+        echomsg 'Not enough space to display popup window.'
+        echohl None
+        return
+    endif
+
+    silent let winid = popup_create(bufnr, extend(opts, {
+            \   'col': wininfo.wincol,
+            \   'minheight': height,
+            \   'maxheight': height,
+            \   'minwidth': wininfo.width - 1,
+            \   'maxwidth': wininfo.width - 1,
+            \   'firstline': firstline,
+            \   'title': title,
+            \   'close': s:preview_win_get('mouseclick'),
+            \   'padding': [0,1,1,1],
+            \   'border': [1,0,0,0],
+            \   'borderchars': [' '],
+            \   'moved': 'any',
+            \   'mapping': v:false,
+            \   'filter': funcref('s:preview_win_popup_filter', [firstline]),
+            \   'filtermode': 'n',
+            \   'highlight': 'QfPreview',
+            \   'scrollbar': s:preview_win_get('scrollbar'),
+            \   'borderhighlight': ['QfPreviewTitle'],
+            \   'scrollbarhighlight': 'QfPreviewScrollbar',
+            \   'thumbhighlight': 'QfPreviewThumb',
+            \   'callback': {... -> !empty(s:preview_win_get('sign'))
+            \     ? [sign_unplace('PopUpQfPreview'), sign_undefine('QfErrorLine')]
+            \     : 0
+            \   }
+            \ })))
+
+    " Set firstline to zero to prevent jumps when calling win_execute() #4876
+    call popup_setoptions(winid, {'firstline': 0})
+    call setwinvar(winid, '&number', !!s:preview_win_get('number'))
+
+    if !empty(s:preview_win_get('sign')->get('text', ''))
+        call setwinvar(winid, '&signcolumn', 'number')
+    endif
+
+    if !empty(s:preview_win_get('sign'))
+        call sign_define('QfErrorLine', s:preview_win_get('sign'))
+        call sign_place(0, 'PopUpQfPreview', 'QfErrorLine', bufnr, {'lnum': lnum})
+    endif
+
+    return winid
+endfunction
+
+let s:preview_win_defaults = {
+        \ 'height': 15,
+        \ 'mouseclick': 'button',
+        \ 'scrollbar': v:true,
+        \ 'number': v:false,
+        \ 'offset': 0,
+        \ 'sign': {'linehl': 'CursorLine'},
+        \ 'scrollup': "\<c-k>",
+        \ 'scrolldown': "\<c-j>",
+        \ 'halfpageup': "\<c-u>",
+        \ 'halfpagedown': "\<c-d>",
+        \ 'fullpageup': "\<c-b>",
+        \ 'fullpagedown': "\<c-f>",
+        \ 'close': 'x'
+        \ }
+
+let s:preview_win_get = {x -> get(b:, 'qfpreview', get(g:, 'qfpreview', {}))->get(x, s:preview_win_defaults[x])}
+
+function! s:preview_win_set_height(winid, step) abort
+    let height = popup_getoptions(a:winid).minheight
+    let newheight = height + a:step > 0 ? height + a:step : 1
+    call popup_setoptions(a:winid, {'minheight': newheight, 'maxheight': newheight})
+    if !empty(s:preview_win_get('sign')->get('text', ''))
+        call setwinvar(a:winid, '&signcolumn', 'number')
+    endif
+endfunction
+
+function! s:preview_win_popup_filter(line, winid, key) abort
+    if a:key ==# s:preview_win_get('scrollup')
+        call win_execute(a:winid, "normal! \<c-y>")
+    elseif a:key ==# s:preview_win_get('scrolldown')
+        call win_execute(a:winid, "normal! \<c-e>")
+    elseif a:key ==# s:preview_win_get('halfpageup')
+        call win_execute(a:winid, "normal! \<c-u>")
+    elseif a:key ==# s:preview_win_get('halfpagedown')
+        call win_execute(a:winid, "normal! \<c-d>")
+    elseif a:key ==# s:preview_win_get('fullpageup')
+        call win_execute(a:winid, "normal! \<c-b>")
+    elseif a:key ==# s:preview_win_get('fullpagedown')
+        call win_execute(a:winid, "normal! \<c-f>")
+    elseif a:key ==# s:preview_win_get('close')
+        call popup_close(a:winid)
+    elseif a:key ==# 'g'
+        call win_execute(a:winid, 'normal! gg')
+    elseif a:key ==# 'G'
+        call win_execute(a:winid, 'normal! G')
+    elseif a:key ==# '+'
+        call s:preview_win_set_height(a:winid, 1)
+    elseif a:key ==# '-'
+        call s:preview_win_set_height(a:winid, -1)
+    elseif a:key ==# 'r'
+        call popup_setoptions(a:winid, {'firstline': a:line})
+        call popup_setoptions(a:winid, {'firstline': 0})
+        " Note: after popup_setoptions() 'signcolumn' needs to be reset again
+        if !empty(s:preview_win_get('sign')->get('text', ''))
+            call setwinvar(a:winid, '&signcolumn', 'number')
+        endif
+    else
+        return v:false
+    endif
+    return v:true
+endfunction

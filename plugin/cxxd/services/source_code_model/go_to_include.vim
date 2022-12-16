@@ -29,7 +29,7 @@ function! cxxd#services#source_code_model#go_to_include#run_callback(status, fil
     if a:status == v:true
         if a:filename != ''
             if s:show_include_in_preview_window
-                execute('pedit ' . a:filename)
+                call cxxd#utils#preview_open(a:filename, 1, 1)
             else
                 execute('edit ' . a:filename)
             endif

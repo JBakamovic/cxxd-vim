@@ -30,10 +30,11 @@ function! cxxd#services#source_code_model#go_to_definition#run_callback(status, 
     if a:status == v:true
         if a:filename != ''
             if s:show_definition_in_preview_window
-                let l:preview_cmd = 'pedit +normal' . a:line . 'G' . a:column . '| ' . a:filename
-                execute(l:preview_cmd)
+                call cxxd#utils#preview_open(a:filename, a:line, a:column)
             else
-                execute('edit ' . a:filename)
+                if expand('%p') != a:filename
+                    execute('edit ' . a:filename)
+                endif
                 call cursor(a:line, a:column)
             endif
         else
