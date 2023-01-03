@@ -28,21 +28,25 @@ Any of your preferred way of installing Vim plugins should be fine. Please note 
 ### Pathogen
 * `$ git clone --recursive https://github.com/JBakamovic/cxxd-vim.git ~/.vim/bundle/cxxd-vim`
 * `$ git clone https://github.com/JBakamovic/yaflandia.git ~/.vim/bundle/yaflandia` (accompanying colorscheme)
+* `$ git clone https://github.com/Shirk/vim-gas.git ~/.vim/bundle/vim-gas` (optional but for better experience with disassembling)
 
 ### Vundle
 After cloning the repository with:
 * `$ git clone --recursive https://github.com/JBakamovic/cxxd-vim.git`
 * `$ git clone https://github.com/JBakamovic/yaflandia.git` (accompanying colorscheme)
+* `$ git clone https://github.com/Shirk/vim-gas.git`
 
 Add the following to your `.vimrc`
 * `Plugin 'JBakamovic/cxxd-vim'`
 * `Plugin 'JBakamovic/yaflandia'` (accompanying colorscheme)
+* `Plugin 'Shirk/vim-gas'` (optional but for better experience with disassembling)
 
 ## Manual
 
 If you're not using any of the plugin managers, you can simply clone the repository into your `~/.vim/` directory:
 * `$ git clone --recursive https://github.com/JBakamovic/cxxd-vim.git ~/.vim/cxxd-vim`
 * `$ git clone https://github.com/JBakamovic/yaflandia.git ~/.vim/yaflandia` (accompanying colorscheme)
+* `$ git clone https://github.com/Shirk/vim-gas.git ~/.vim/vim-gas` (optional but for better experience with disassembling)
 
 # Features
 
@@ -69,20 +73,25 @@ If you want to to tweak your favorite colorscheme, you can try using the [`make_
 # Usage
 Command | Default Key-Mapping | Purpose
 ------- | :-------------------: | --------
-`CxxdStart <path-to-your-project-dir>` | None | Starts `cxxd` server for given project directory in auto-discovery mode. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time  depending on the project size).
+`CxxdStart <path-to-your-project-dir>` | None | Starts `cxxd` server for given project directory in auto-discovery mode. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time depending on the project size).
 `CxxdStart <path-to-your-project-dir> <build-target-name>` | None | Starts `cxxd` server for given project directory and given build-target. Build-target must exist in `.cxxd_config.json` file. Builds symbol index database. Most other commands will not have effect until symbol index database is built (which may take some time  depending on the project size).
 `CxxdStop` | None | Stops `cxxd` server.
 `CxxdRebuildIndex` | `<Ctrl-\>r` | Rebuilds the symbol index database.
 `CxxdGoToInclude` | `<F3>` and `<Shift-F3>` | Jumps to the file included via `#include` directive.
+`CxxdGoToIncludeInPreview` | `<Alt-F3>` | Peeks into the file included via `#include` directive and shows it in a small preview window.
 `CxxdGoToDefintion` | `<F12>` and `<Shift-F12>` | Jumps to the symbol definition under the cursor.
+`CxxdGoToDefintionInPreview` | `<Alt-F12>` | Peeks into the definition and shows it in a small preview window.
 `CxxdFindAllReferences` | `<Ctrl-\>s` | Finds all references of symbol under the cursor. Results are stored into a `QuickFix` list once the operation is completed.
 `CxxdFetchAllDiagnostics` | `<Ctrl-\>d` | Fetches all diagnostics of all source files indexed. Results are stored into a `QuickFix` list once the operation is completed.
 `CxxdAnalyzerClangTidyBuf` | `<F5>` | Runs `clang-tidy` on current file. Results are stored into a `QuickFix` list once `clang-tidy` is completed.
 `CxxdAnalyzerClangTidyApplyFixesBuf` | `<Shift-F5>` | Runs `clang-tidy` on current file and applies the fixes. Results are stored into a `QuickFix` list once `clang-tidy` is completed.
-`CxxdBuildRun <build_cmd>` | None | Runs a build with `<build_cmd>` provided. `<build_cmd>` can be of any arbitrary form which fits the build system your project is using (e.g. `make`, `make clean`, `make debug`, `make test`, etc.). Results are stored into a `QuickFix` list once the `<build_cmd>` is completed.
+`CxxdBuildRun` | `<F9>` | Runs a build with `<build_cmd>` which is provided in `.cxxd_config.json`. Build command that will be run will correspond to the way how `CxxdServer` was started, e.g. `<build-target-name>`.
+`CxxdBuildRunWithParams <build_cmd>` | None | Manual way of doing the `CxxdBuildRun`. Runs a build with `<build_cmd>` provided. `<build_cmd>` can be of any arbitrary form which fits the build system your project is using (e.g. `make`, `make clean`, `make debug`, `make test`, etc.). Results are stored into a `QuickFix` list once the `<build_cmd>` is completed.
+`CxxdDisassemblyPickTarget` | None | Opens a list of available targets (executables) and allows you to select one of the them you're interested in into disassemblying. This target will be used when `CxxdDisassemblyPickSymbol` will be run.
+`CxxdDisassemblyPickSymbol` | None | Position a cursor at some symbol of interest, e.g. some function, and run this command. It will open a list of potential symbols (this list will ideally be of size 1). After confirming your choice from the list, a disassembled binary will be opened and cursor will be positioned at the symbol which you just selected.
 `lopen` | None | Opens location list containing `clang-fix-it` hints for current buffer.
 `w` | None | Re-formats the source code in current buffer with `clang-format`.
-`mouse hover over the symbol` | None | Shows a symbol type in a small balloon.
+`mouse hover over the symbol` | None | If hovered over the C or C++ sourc-code, it will show a symbol type in a tooltip. If hovered over the assembly (e.g. in disassembled binary after `CxxdDisassemblyPickSymbol`), it will show the documentation of the underlying ASM instruction in a tooltip.
 `colorscheme yaflandia` | None | Activates a colorscheme which has support for semantic syntax highlighting. Any other compatible colorscheme can be used of course.
 
 # Screenshots
@@ -125,6 +134,12 @@ TBD
 ## Project build
 
 ![Project build](https://raw.githubusercontent.com/wiki/JBakamovic/cxxd-vim/images/project-build.gif)
+
+## Disassembly
+
+Use https://github.com/Shirk/vim-gas.git for better ASM syntax highlighting experience. See [Dependencies](#dependencies) section for more details.
+
+![Disassembly](https://raw.githubusercontent.com/wiki/JBakamovic/cxxd-vim/images/disassembly.gif)
 
 # FAQ
 

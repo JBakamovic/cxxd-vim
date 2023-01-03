@@ -39,6 +39,7 @@ server_handle = cxxd.api.server_start(
 )
 EOF
     call cxxd#server#start_all_services()
+    set ballooneval balloonexpr=cxxd#server#balloonexpr()
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -59,6 +60,7 @@ function! cxxd#server#start_all_services()
     call cxxd#services#clang_format#start()
     call cxxd#services#project_builder#start()
     call cxxd#services#code_completion#start()
+    call cxxd#services#disassembly#start()
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -71,4 +73,20 @@ function! cxxd#server#stop_all_services(subscribe_for_shutdown_callback)
     call cxxd#services#clang_format#stop(a:subscribe_for_shutdown_callback)
     call cxxd#services#project_builder#stop(a:subscribe_for_shutdown_callback)
     call cxxd#services#code_completion#stop(a:subscribe_for_shutdown_callback)
+    call cxxd#services#disassembly#stop(a:subscribe_for_shutdown_callback)
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#server#balloonexpr()
+" Description:  Now that we have multiple services hooked onto the mouse-hover
+"               action, we have to properly dispatch them to appropriate
+"               service.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#server#balloonexpr()
+    let l:buf_ext = fnamemodify(bufname(v:beval_bufnr), ':e')
+    if l:buf_ext == 'asm'
+        return cxxd#services#disassembly#asm_instruction_info()
+    else
+        return cxxd#services#source_code_model#type_deduction#run()
+    endif
 endfunction

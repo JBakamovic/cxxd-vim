@@ -98,11 +98,17 @@ let g:cxxd_clang_tidy           = {
 \                                   'config'  : '.clang-tidy'
 \}
 
+let g:cxxd_disassembly          = {
+\                                   'enabled' : 1,
+\                                   'started' : 0,
+\}
+
 let g:cxxd_available_services   = [
 \                                   g:cxxd_src_code_model,
 \                                   g:cxxd_project_builder,
 \                                   g:cxxd_clang_format,
 \                                   g:cxxd_clang_tidy,
+\                                   g:cxxd_disassembly
 \]
 
 
@@ -179,6 +185,8 @@ augroup END
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
 :command                        CxxdBuildRun                          :call cxxd#services#project_builder#run_target()
 :command -nargs=+               CxxdBuildRunWithParams                :call cxxd#services#project_builder#run_custom(<f-args>)
+:command                        CxxdDisassemblyPickTarget             :call cxxd#services#disassembly#pick_target()
+:command                        CxxdDisassemblyPickSymbol             :call cxxd#services#disassembly#pick_symbol(expand('%p'), line('.'), col('.'))
 
 "
 " Cxxd default-provided key mappings
