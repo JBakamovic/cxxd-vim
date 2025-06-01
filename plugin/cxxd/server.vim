@@ -86,7 +86,7 @@ function! cxxd#server#balloonexpr()
     let l:buf_ext = fnamemodify(bufname(v:beval_bufnr), ':e')
     if l:buf_ext == 'asm'
         return cxxd#services#disassembly#asm_instruction_info()
-    else
+    elseif l:buf_ext =~# '\v^(cpp|cxx|cc|c|h|hh|hpp|hxx)$'
         return cxxd#services#source_code_model#type_deduction#run()
     endif
 endfunction

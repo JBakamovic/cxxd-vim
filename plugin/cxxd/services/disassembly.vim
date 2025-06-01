@@ -71,10 +71,29 @@ function! cxxd#services#disassembly#pick_target_callback(status, target_candidat
     if a:status == v:true
         let s:target_candidates = a:target_candidates
 python3 << EOF
+import os
 import vim
+def truncate_path_in_the_middle(path, max_length=120):
+    if len(path) <= max_length:
+        return path
+    else:
+        # Number of chars to show at start and end
+        # Reserve 3 chars for '...'
+        keep = max_length - 3
+        front = keep // 2
+        back = keep - front
+        return path[:front] + '...' + path[-back:]
+
+def truncate_paths(paths_str):
+    shortened = []
+    paths_list = [p.strip().strip("'") for p in paths_str.split(',')]
+    for p in paths_list:
+        shortened.append(truncate_path_in_the_middle(p))
+    return ", ".join(f"'{p}'" for p in shortened)
+
 min_popup_height = 10 if int(vim.eval('a:nr_of_targets')) > 10 else int(vim.eval('a:nr_of_targets'))
 with open(vim.eval('a:target_candidates'), 'r') as f:
-    vim.eval("popup_menu([" + f.read() + """],
+    vim.eval("popup_menu([" + truncate_paths(f.read()) + """],
            #{  title: \'Select the target\',
                callback: 'cxxd#services#disassembly#select_target_from_pick_target_callback',
                highlight: 'Question',

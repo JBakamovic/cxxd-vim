@@ -70,14 +70,14 @@ let g:cxxd_src_code_model       = {
 \                                       'go_to_definition'          : { 'enabled' : 1 },
 \                                       'go_to_include'             : { 'enabled' : 1 },
 \                                       'code_completion'           : {
-\                                                                       'enabled' : 1,
+\                                                                       'enabled' : 0,
 \                                                                       'sorting_strategy' : g:cxxd_code_completion_sorting_strategies['priority'],
 \                                       }
 \                                   }
 \}
 
 let g:cxxd_code_completion      = {
-\                                   'enabled' : 1,
+\                                   'enabled' : 0,
 \                                   'started' : 0,
 \}
 
