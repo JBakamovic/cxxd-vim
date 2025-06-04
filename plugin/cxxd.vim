@@ -57,6 +57,16 @@ let g:cxxd_fetch_all_diagnostics_sorting_strategies = {
 \}
 
 "
+" Upon source code indexing completion, this variable controls whether or not
+" the indexing diagnostics will be retrived or not. This operation can be
+" lengthy and it is mostly useful only once, after initial indexing for
+" debugging source code model. We therefore set it to v:false by default.
+" Diagnostics, regardless, can be always retrieved via separate
+" CxxdFetchAllDiagnostics* command at any time.
+"
+let g:cxxd_fetch_all_diagnostics_upon_startup = v:false
+
+"
 " Cxxd services definition
 "
 let g:cxxd_src_code_model       = {

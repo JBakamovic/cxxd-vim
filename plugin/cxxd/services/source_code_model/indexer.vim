@@ -39,9 +39,11 @@ endfunction
 function! cxxd#services#source_code_model#indexer#run_on_directory_callback(status)
     if a:status == v:true
         echomsg 'Indexing successfully completed.'
-        call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(
-\           g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc']
-\       )
+        if g:cxxd#services#source_code_model#indexer#fetch_all_diagnostics == v:true
+            call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(
+\               g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc']
+\           )
+        endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-run-on-directory) service. See Cxxd server log for more details!' | echohl None
     endif
