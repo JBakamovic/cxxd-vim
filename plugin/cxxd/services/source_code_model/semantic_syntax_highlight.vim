@@ -16,9 +16,9 @@ function! cxxd#services#source_code_model#semantic_syntax_highlight#run(filename
         let l:current_visible_line_begin = line('w0')
         let l:current_visible_line_end = line('w$')
         if cxxd#utils#is_more_modifications_done(winnr()) || cxxd#utils#is_viewport_changed(winnr())
-            python3 cxxd.api.source_code_model_semantic_syntax_highlight_request(
-\ 		        server_handle, vim.eval('a:filename'), vim.eval('l:contents_filename'), vim.eval('l:current_visible_line_begin'), vim.eval('l:current_visible_line_end')
-\ 	        )
+            let l:service_payload = [0x1, a:filename, l:contents_filename, l:current_visible_line_begin, l:current_visible_line_end]
+            let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+            call cxxd#server#send_request(l:req)
         endif
     endif
 endfunction
@@ -27,7 +27,7 @@ endfunction
 " Function:     cxxd#services#source_code_model#semantic_syntax_highlight#run_callback()
 " Description:  Apply the results of source code highlighting for given filename.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#source_code_model#semantic_syntax_highlight#run_callback(status, filename, syntax_file)
+function! cxxd#services#source_code_model#semantic_syntax_highlight#run_callback(status, filename, highlights)
     if a:status == v:true
         let l:current_buffer = expand('%:p')
         if l:current_buffer == a:filename
@@ -35,11 +35,27 @@ function! cxxd#services#source_code_model#semantic_syntax_highlight#run_callback
             call clearmatches()
 
             " Apply the syntax highlighting rules
-            execute('source ' . a:syntax_file)
+            " a:highlights is a Dict: { 'Group': [[line, col, len], ...], ... }
+            if !empty(a:highlights)
+                for [l:group, l:positions] in items(a:highlights)
+                    " matchaddpos expects a list of positions where each is [lnum, col, len]
+                    " LIMIT: matchaddpos accepts up to 8 positions. We must chunk.
+                    let l:i = 0
+                    let l:pos_len = len(l:positions)
+                    while l:i < l:pos_len
+                        let l:chunk = l:positions[l:i : l:i + 7]
+                        try
+                             call matchaddpos(l:group, l:chunk)
+                        catch
+                            " Be resilient against invalid positions
+                        endtry
+                        let l:i += 8
+                    endwhile
+                endfor
+            endif
 
             " Following command is a quick hack to apply the new syntax for
-            " the given buffer. I haven't found any other more viable way to do it 
-            " while keeping it fast & low on resources,
+            " the given buffer.
             execute(':redrawstatus')
         endif
     else

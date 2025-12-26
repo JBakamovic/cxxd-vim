@@ -57,7 +57,6 @@ class VimDiagnostics:
             logging.error('Something went wrong in diagnostics service ... Diagnostics not available. Payload={0}'.format(payload))
 
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#diagnostics#run_callback(" + str(int(success)) + ", " + str(vim_diagnostics).replace('"', r"") + ")"
         )
 

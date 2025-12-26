@@ -7,15 +7,14 @@ import services.code_completion.code_completion
 import services.disassembly.disassembly
 
 def get_instance(handle, project_root_directory, target_configuration, args):
-    vim_instance = args
     return cxxd.server.Server(
         handle,
         project_root_directory,
         target_configuration,
-        services.source_code_model.source_code_model.VimSourceCodeModel(vim_instance),
-        services.project_builder.project_builder.VimProjectBuilder(vim_instance),
-        services.clang_format.clang_format.VimClangFormat(vim_instance),
-        services.clang_tidy.clang_tidy.VimClangTidy(vim_instance),
-        services.code_completion.code_completion.VimCodeCompletion(vim_instance),
-        services.disassembly.disassembly.VimDisassembly(vim_instance)
+        services.source_code_model.source_code_model.VimSourceCodeModel(args),
+        services.project_builder.project_builder.VimProjectBuilder(args),
+        services.clang_format.clang_format.VimClangFormat(args),
+        services.clang_tidy.clang_tidy.VimClangTidy(args),
+        services.code_completion.code_completion.VimCodeCompletion(args),
+        services.disassembly.disassembly.VimDisassembly(args)
     )

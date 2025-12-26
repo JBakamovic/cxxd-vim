@@ -3,7 +3,8 @@
 " Description:  Starts the source code formatting background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_format#start()
-    python3 cxxd.api.clang_format_start(server_handle)
+    let l:req = {'header': 0xF1, 'service_id': 0x2, 'payload': []}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -24,7 +25,8 @@ endfunction
 " Dependency:
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_format#stop(subscribe_for_shutdown_callback)
-    python3 cxxd.api.clang_format_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    let l:req = {'header': 0xFE, 'service_id': 0x2, 'payload': [a:subscribe_for_shutdown_callback]}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -45,7 +47,8 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_format#run(filename)
     if g:cxxd_clang_format['started'] && g:cxxd_clang_format['enabled']
-        python3 cxxd.api.clang_format_request(server_handle, vim.eval('a:filename'))
+        let l:req = {'header': 0xF2, 'service_id': 0x2, 'payload': [a:filename]}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 

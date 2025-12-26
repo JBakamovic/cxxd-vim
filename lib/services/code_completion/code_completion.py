@@ -1,6 +1,5 @@
+import json
 import logging
-import os
-import tempfile
 from utils import Utils
 from cxxd.parser.ast_node_identifier import ASTNodeId
 from cxxd.parser.clang_parser import ClangParser
@@ -10,7 +9,6 @@ from cxxd.services.code_completion.code_completion import CodeCompletionRequestI
 class VimCodeCompletion(ServicePlugin):
     def __init__(self, servername):
         self.servername = servername
-        self.code_complete_candidates_output = os.path.join(tempfile.gettempdir(), self.servername + 'code_complete_candidates')
 
     def _create_vim_complete_item(self, candidate, detailed_candidate, kind, result_type, extra_documentation = None):
         return {
@@ -88,12 +86,12 @@ class VimCodeCompletion(ServicePlugin):
         return ''
 
     def startup_callback(self, success, payload, startup_payload):
-        Utils.call_vim_remote_function(self.servername, "cxxd#services#code_completion#start_callback(" + str(int(success)) + ")")
+        Utils.call_vim_remote_function("cxxd#services#code_completion#start_callback(" + str(int(success)) + ")")
 
     def shutdown_callback(self, success, payload, shutdown_payload):
         reply_with_callback = bool(payload[0])
         if reply_with_callback:
-            Utils.call_vim_remote_function(self.servername, "cxxd#services#code_completion#stop_callback(" + str(int(success)) + ")")
+            Utils.call_vim_remote_function("cxxd#services#code_completion#stop_callback(" + str(int(success)) + ")")
 
     def __call__(self, success, payload, code_completion_results):
         if not success:
@@ -113,8 +111,7 @@ class VimCodeCompletion(ServicePlugin):
     def __code_complete(self, success, payload, code_completion_results):
         def call_vim_rpc(status, completion_candidates, length):
             Utils.call_vim_remote_function(
-                self.servername,
-                "cxxd#services#code_completion#run_callback(" + str(int(status)) + ", '" + str(completion_candidates) + "', " + str(length) + ")"
+                "cxxd#services#code_completion#run_callback(" + str(int(status)) + ", " + str(completion_candidates) + ", " + str(length) + ")"
             )
 
         if success:
@@ -135,10 +132,8 @@ class VimCodeCompletion(ServicePlugin):
                 else:
                     logging.error('Cannot handle following cursor kind: {0}'.format(result.kind))
 
-            with open(self.code_complete_candidates_output, 'w') as f:
-                f.writelines(', '.join(str(item) for item in candidate_list))
-
-            call_vim_rpc(success, self.code_complete_candidates_output, len(candidate_list))
+            json_candidates = json.dumps(candidate_list)
+            call_vim_rpc(success, json_candidates, len(candidate_list))
             logging.info('Found {0} candidates.'.format(len(candidate_list)))
         else:
-            call_vim_rpc(success, [], 0)
+            call_vim_rpc(success, "[]", 0)

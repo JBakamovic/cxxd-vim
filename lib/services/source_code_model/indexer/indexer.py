@@ -1,14 +1,13 @@
 import logging
 import os
-import tempfile
+
+import json
 from cxxd.services.source_code_model.indexer.clang_indexer import SourceCodeModelIndexerRequestId
 from utils import Utils
 
 class VimIndexer:
     def __init__(self, servername):
         self.servername = servername
-        self.find_all_references_output = os.path.join(tempfile.gettempdir(), self.servername + 'find_all_references')
-        self.fetch_all_diagnostics_output = os.path.join(tempfile.gettempdir(), self.servername + 'fetch_all_diagnostics')
         self.op = {
             SourceCodeModelIndexerRequestId.RUN_ON_SINGLE_FILE    : self.__run_on_single_file,
             SourceCodeModelIndexerRequestId.RUN_ON_DIRECTORY      : self.__run_on_directory,
@@ -26,45 +25,41 @@ class VimIndexer:
 
     def __run_on_single_file(self, success, args):
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#indexer#run_on_single_file_callback(" + str(int(success)) + ")"
         )
 
     def __run_on_directory(self, success, args):
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#indexer#run_on_directory_callback(" + str(int(success)) + ")"
         )
 
     def __drop_single_file(self, success, args):
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#indexer#drop_single_file_callback(" + str(int(success)) + ")"
         )
 
     def __drop_all(self, success, args):
         Utils.call_vim_remote_function(
-            self.servername, "cxxd#services#source_code_model#indexer#drop_all_callback(" + str(int(success)) + ")"
+            "cxxd#services#source_code_model#indexer#drop_all_callback(" + str(int(success)) + ")"
         )
 
     def __find_all_references(self, success, references):
         quickfix_list = []
         for ref in references:
             filename, line, column, context = ref
-            quickfix_list.append(
-                "{'filename': '" + filename + "', " +
-                "'lnum': '" + str(line) + "', " +
-                "'col': '" + str(column) + "', " +
-                "'type': 'I', " +
-                "'text': '" + context.replace("'", r"''").rstrip() + "'}"
-            )
+            # Construct dictionary for JSON serialization
+            quickfix_list.append({
+                'filename': filename,
+                'lnum': line,
+                'col': column,
+                'type': 'I',
+                'text': context.rstrip()
+            })
 
-        with open(self.find_all_references_output, 'w') as f:
-            f.writelines(', '.join(item for item in quickfix_list))
+        json_references = json.dumps(quickfix_list)
 
         Utils.call_vim_remote_function(
-            self.servername,
-            "cxxd#services#source_code_model#indexer#find_all_references_callback(" + str(int(success)) + ", '" + self.find_all_references_output + "')"
+            "cxxd#services#source_code_model#indexer#find_all_references_callback(" + str(int(success)) + ", " + json_references + ")"
         )
         logging.debug("References: " + str(quickfix_list))
 
@@ -91,19 +86,17 @@ class VimIndexer:
         quickfix_list = []
         for diag in diagnostics:
             filename, line, column, description, severity = diag
-            quickfix_list.append(
-                "{'filename': '" + filename + "', " +
-                "'lnum': '" + str(line) + "', " +
-                "'col': '" + str(column) + "', " +
-                "'type': '" + clang_severity_to_quickfix_type(severity) + "', " +
-                "'text': '" + description.replace("'", r"''").rstrip() + "'}"
-            )
+            quickfix_list.append({
+                'filename': filename,
+                'lnum': line,
+                'col': column,
+                'type': clang_severity_to_quickfix_type(severity),
+                'text': description.rstrip()
+            })
 
-        with open(self.fetch_all_diagnostics_output, 'w') as f:
-            f.writelines(', '.join(item for item in quickfix_list))
+        json_diagnostics = json.dumps(quickfix_list)
 
         Utils.call_vim_remote_function(
-            self.servername,
-            "cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback(" + str(int(success)) + ", '" + self.fetch_all_diagnostics_output + "')"
+            "cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback(" + str(int(success)) + ", " + json_diagnostics + ")"
         )
         logging.debug("Diagnostics: " + str(quickfix_list))
