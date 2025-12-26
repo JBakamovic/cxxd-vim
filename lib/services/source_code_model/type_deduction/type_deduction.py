@@ -8,7 +8,6 @@ class VimTypeDeduction:
     def __call__(self, success, payload, type_spelling):
         def call_vim_rpc(status, type_spelling):
             Utils.call_vim_remote_function(
-                self.servername,
                 "cxxd#services#source_code_model#type_deduction#run_callback(" + str(int(status)) + ", '" + type_spelling + "')"
             )
 

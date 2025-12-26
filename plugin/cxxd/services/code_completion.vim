@@ -1,5 +1,6 @@
 function! cxxd#services#code_completion#start()
-    python3 cxxd.api.code_completion_start(server_handle)
+    let l:req = {'header': 0xF1, 'service_id': 0x4, 'payload': []}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 function! cxxd#services#code_completion#start_callback(status)
@@ -11,7 +12,8 @@ function! cxxd#services#code_completion#start_callback(status)
 endfunction
 
 function! cxxd#services#code_completion#stop(subscribe_for_shutdown_callback)
-    python3 cxxd.api.code_completion_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    let l:req = {'header': 0xFE, 'service_id': 0x4, 'payload': [a:subscribe_for_shutdown_callback]}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 function! cxxd#services#code_completion#stop_callback(status)
@@ -27,15 +29,11 @@ function! cxxd#services#code_completion#run(filename, line, column)
         if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = cxxd#utils#pick_content_filename(a:filename)
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-            python3 cxxd.api.code_complete_request(
-\               server_handle,
-\               vim.eval('a:filename'),
-\               vim.eval('l:contents_filename'),
-\               vim.eval('a:line'),
-\               vim.eval('a:column'),
-\               vim.eval('line2byte(a:line)'),
-\               vim.eval("g:cxxd_src_code_model['services']['code_completion']['sorting_strategy']")
-\           )
+            let l:offset = line2byte(a:line)
+            let l:strategy = g:cxxd_src_code_model['services']['code_completion']['sorting_strategy']
+            let l:service_payload = [0x0, a:filename, l:contents_filename, a:line, a:column, l:offset, l:strategy]
+            let l:req = {'header': 0xF2, 'service_id': 0x4, 'payload': l:service_payload}
+            call cxxd#server#send_request(l:req)
         endif
     endif
 endfunction
@@ -55,11 +53,7 @@ function! cxxd#services#code_completion#run_callback(status, code_completion_can
             else
                 let l:start_completion_col = col('.') - l:idx
             endif
-python3 << EOF
-import vim
-with open(vim.eval('a:code_completion_candidates'), 'r') as f:
-    vim.eval("complete(" + vim.eval('l:start_completion_col') + ", [" + f.read() + "])")
-EOF
+            call complete(l:start_completion_col, a:code_completion_candidates)
         else
             call complete(col('.'), [])
         endif
@@ -72,12 +66,9 @@ function! cxxd#services#code_completion#cache_warmup(filename)
     let l:last_line = line('$')
     let l:last_col = col([l:last_line, '$'])
     if g:cxxd_code_completion['started'] && g:cxxd_code_completion['enabled']
-        python3 cxxd.api.code_complete_cache_warmup_request(
-\           server_handle,
-\           vim.eval('a:filename'),
-\           vim.eval('l:last_line'),
-\           vim.eval('l:last_col')
-\       )
+        let l:service_payload = [0x1, a:filename, l:last_line, l:last_col]
+        let l:req = {'header': 0xF2, 'service_id': 0x4, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 

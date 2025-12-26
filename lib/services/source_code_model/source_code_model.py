@@ -1,5 +1,4 @@
 import logging
-import tempfile
 import os
 from utils import Utils
 from cxxd.service_plugin import ServicePlugin
@@ -15,7 +14,7 @@ class VimSourceCodeModel(ServicePlugin):
     def __init__(self, servername):
         self.servername = servername
         self.indexer = VimIndexer(self.servername)
-        self.semantic_syntax_higlight = VimSemanticSyntaxHighlight(self.servername, tempfile.gettempdir() + os.sep + self.servername + '_syntax_file.vim')
+        self.semantic_syntax_higlight = VimSemanticSyntaxHighlight(self.servername)
         self.diagnostics = VimDiagnostics(self.servername)
         self.type_deduction = VimTypeDeduction(self.servername)
         self.go_to_definition = VimGoToDefinition(self.servername)
@@ -23,7 +22,6 @@ class VimSourceCodeModel(ServicePlugin):
 
     def startup_callback(self, success, payload, startup_payload):
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#start_callback(" + str(int(success)) + ")"
         )
 
@@ -31,7 +29,6 @@ class VimSourceCodeModel(ServicePlugin):
         reply_with_callback = bool(payload[0])
         if reply_with_callback:
             Utils.call_vim_remote_function(
-                self.servername,
                 "cxxd#services#source_code_model#stop_callback(" + str(int(success)) + ")"
             )
 

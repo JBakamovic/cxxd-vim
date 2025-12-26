@@ -13,7 +13,8 @@ let s:asm_col = 0
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#disassembly#start()
     if g:cxxd_disassembly['enabled']
-        python3 cxxd.api.disassembly_start(server_handle)
+        let l:req = {'header': 0xF1, 'service_id': 0x5, 'payload': []}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -35,7 +36,8 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#disassembly#stop(subscribe_for_shutdown_callback)
     if g:cxxd_disassembly['enabled']
-        python3 cxxd.api.disassembly_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+        let l:req = {'header': 0xFE, 'service_id': 0x5, 'payload': [a:subscribe_for_shutdown_callback]}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -57,63 +59,49 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#disassembly#pick_target()
     if g:cxxd_disassembly['started'] && g:cxxd_disassembly['enabled']
-        python3 cxxd.api.disassembly_list_targets(server_handle)
+        let l:req = {'header': 0xF2, 'service_id': 0x5, 'payload': [0x0]}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
+
+" ... (Callbacks use python for popup which is finesish if safe, but ideally migrate too. I will leave popup logic for now as it's UI, not Server comms)
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#disassembly#pick_target_callback()
-" Description:  Callback from cxxd#services#disassembly#pick_target. This is
-"               This is where we present the list of targets in a popup menu
-"               which user can use to select an entry (target of interest).
+" Description:  Popup with disassembly targets.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#disassembly#pick_target_callback(status, target_candidates, nr_of_targets)
+function! cxxd#services#disassembly#pick_target_callback(status, targets)
     if a:status == v:true
-        let s:target_candidates = a:target_candidates
-python3 << EOF
-import vim
-min_popup_height = 10 if int(vim.eval('a:nr_of_targets')) > 10 else int(vim.eval('a:nr_of_targets'))
-with open(vim.eval('a:target_candidates'), 'r') as f:
-    vim.eval("popup_menu([" + f.read() + """],
-           #{  title: \'Select the target\',
-               callback: 'cxxd#services#disassembly#select_target_from_pick_target_callback',
-               highlight: 'Question',
-               filter: 's:popup_filter',
-               minheight: """ + str(min_popup_height) + """,
-               maxheight: 40,
-               minwidth: 120,
-               maxwidth: 120
-            }
-       )"""
-    )
-EOF
-        redraw
+        let s:target_candidates = a:targets
+        let l:count = len(s:target_candidates)
+        if l:count > 0
+            let l:min_popup_height = l:count > 10 ? 10 : l:count
+            call popup_menu(s:target_candidates, #{
+            \ callback: 'cxxd#services#disassembly#pick_target_handler',
+            \ title: ' Select Disassembly Target ',
+            \ highlight: 'Question',
+            \ filter: 's:popup_filter',
+            \ border: [],
+            \ padding: [1,1,1,1],
+            \ minheight: l:min_popup_height,
+            \ maxheight: 40,
+            \ minwidth: 120,
+            \ maxwidth: 120
+            \})
+        else
+            echohl WarningMsg | echomsg 'No disassembly targets found.' | echohl None
+        endif
     else
-        let s:target_candidates = ''
-        echohl WarningMsg | echomsg 'Something went wrong with disassembly service. See Cxxd server log for more details!' | echohl None
+        echohl WarningMsg | echomsg 'Something went wrong with disassembly service (pick-target). See Cxxd server log for more details!' | echohl None
     endif
 endfunction
 
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Function:     cxxd#services#disassembly#select_target_from_pick_target_callback()
-" Description:  Popup menu callback from cxxd#services#disassembly#pick_target_callback.
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#disassembly#select_target_from_pick_target_callback(id, target_entry)
-    if a:target_entry < 1
-        let s:target_selected_idx = -1
-        return
+function! cxxd#services#disassembly#pick_target_handler(id, result)
+    if a:result != -1
+        let s:target_selected_idx = a:result - 1
+        let s:target_selected = s:target_candidates[s:target_selected_idx]
+        echomsg 'Selected target: ' . s:target_selected
     endif
-
-    let s:target_selected_idx = a:target_entry - 1
-    echomsg 'Target selected ' . s:target_selected_idx
-python3 << EOF
-import vim
-with open(vim.eval('s:target_candidates'), 'r') as f:
-    candidates = f.readlines()[0].split(',')
-    selected = candidates[int(vim.eval('s:target_selected_idx'))]
-    vim.command('let s:target_selected=' + selected)
-EOF
-    echomsg 'Target selected ' . s:target_selected
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -123,60 +111,49 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#disassembly#pick_symbol(filename, line, column)
     if g:cxxd_disassembly['started'] && g:cxxd_disassembly['enabled'] && s:target_selected != ''
-        python3 cxxd.api.disassembly_list_symbol_candidates(server_handle, vim.eval('s:target_selected'), vim.eval('a:filename'), vim.eval('a:line'), vim.eval('a:column'))
+        let l:service_payload = [0x1, s:target_selected, a:filename, a:line, a:column]
+        let l:req = {'header': 0xF2, 'service_id': 0x5, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
+
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#disassembly#pick_symbol_callback()
-" Description:  Callback from cxxd#services#disassembly#pick_symbol.
-"               This is where we present the list of symbols in a popup menu
-"               which user can use to select an entry (symbol of interest).
+" Description:  Popup with disassembly symbols.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#disassembly#pick_symbol_callback(status, symbol_candidates, nr_of_symbols)
-    if a:status == 1
-        let s:symbol_candidates = a:symbol_candidates
-        if a:nr_of_symbols > 0
-python3 << EOF
-import vim
-min_popup_height = 10 if int(vim.eval('a:nr_of_symbols')) > 10 else int(vim.eval('a:nr_of_symbols'))
-with open(vim.eval('a:symbol_candidates'), 'r') as f:
-    vim.eval("popup_menu([" + f.read() + """],
-           #{  title: \'Select the symbol\',
-               callback: 'cxxd#services#disassembly#select_symbol_from_pick_symbol_callback',
-               highlight: 'Question',
-               filter: 's:popup_filter',
-               minheight: """ + str(min_popup_height) + """,
-               maxheight: 40,
-               minwidth: 120,
-               maxwidth: 240
-            }
-       )"""
-   )
-EOF
+function! cxxd#services#disassembly#pick_symbol_callback(status, symbols)
+    if a:status == v:true
+        let s:symbol_candidates = a:symbols
+        let l:count = len(s:symbol_candidates)
+        if l:count > 0
+            let l:min_popup_height = l:count > 10 ? 10 : l:count
+            call popup_menu(s:symbol_candidates, #{
+            \ callback: 'cxxd#services#disassembly#pick_symbol_handler',
+            \ title: ' Select Symbol to Disassemble ',
+            \ highlight: 'Question',
+            \ filter: 's:popup_filter',
+            \ minheight: l:min_popup_height,
+            \ maxheight: 40,
+            \ minwidth: 120,
+            \ maxwidth: 120,
+            \ border: [],
+            \ padding: [1,1,1,1]
+            \})
         else
-            echohl WarningMsg | echomsg 'No symbol candidates found. Symbol is most likely inlined or not visible from current translation unit. Try with another one!' | echohl None
+            echohl WarningMsg | echomsg 'No symbols found for selected target. Symbol is most likely inlined or not visible from current translation unit. Try with another one!' | echohl None
         endif
     else
-        let s:symbol_candidates = ''
-        echohl WarningMsg | echomsg 'Something went wrong with disassembly service. See Cxxd server log for more details!' | echohl None
+        echohl WarningMsg | echomsg 'Something went wrong with disassembly service (pick-symbol). See Cxxd server log for more details!' | echohl None
     endif
-    redraw
 endfunction
 
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Function:     cxxd#services#disassembly#select_symbol_from_pick_symbol_callback()
-" Description:  Popup menu callback from cxxd#services#disassembly#pick_symbol_callback.
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#disassembly#select_symbol_from_pick_symbol_callback(id, symbol_entry)
-    if a:symbol_entry < 1
-        let s:symbol_selected_idx = -1
-        return
+function! cxxd#services#disassembly#pick_symbol_handler(id, result)
+    if a:result != -1
+        let s:symbol_selected_idx = a:result - 1
+        echomsg 'Selected symbol index: ' . s:symbol_selected_idx
+        call cxxd#services#disassembly#run()
     endif
-
-    let s:symbol_selected_idx = a:symbol_entry - 1
-    echomsg 'Symbol selected ' . s:symbol_selected_idx
-    call cxxd#services#disassembly#run()
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -185,20 +162,22 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#disassembly#run()
     if g:cxxd_disassembly['started'] && g:cxxd_disassembly['enabled'] && s:target_selected != '' && s:symbol_selected_idx != -1
-        python3 cxxd.api.disassembly_run(server_handle, vim.eval('s:target_selected'), vim.eval('s:symbol_selected_idx'))
+        let l:service_payload = [0x2, s:target_selected, s:symbol_selected_idx]
+        let l:req = {'header': 0xF2, 'service_id': 0x5, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#disassembly#run_callback()
-" Description:  Callback from cxxd#services#disassembly#run. Displays the disassembled binary and jumps to the selected symbol.
+" Description:  Opens disassembly view.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#disassembly#run_callback(status, disassembly_output, address, offset)
+function! cxxd#services#disassembly#run_callback(status, output_file, addr, offset)
     if a:status == v:true
-        if bufloaded(a:disassembly_output) == 0
-            execute('vs' . a:disassembly_output)
+        if bufloaded(a:output_file) == 0
+            execute 'vsplit ' . a:output_file
         else
-            let l:bufnr = bufnr(a:disassembly_output)
+            let l:bufnr = bufnr(a:output_file)
             let l:winnr = win_findbuf(l:bufnr)
             call win_gotoid(l:winnr[0])
             call cursor(1, 1)
@@ -206,12 +185,13 @@ function! cxxd#services#disassembly#run_callback(status, disassembly_output, add
             " meantime so we have to force Vim to reload the contents
             execute('e')
         endif
-        execute('set ft=gas')
-        execute('setlocal readonly')
-        execute('setlocal nomodifiable')
-        call search(a:address . ':')
+
+        setlocal filetype=gas
+        setlocal readonly
+        setlocal nomodifiable
+        call search(a:addr . ':')
     else
-        echohl WarningMsg | echomsg 'Something went wrong with disassembly service. See Cxxd server log for more details!' | echohl None
+        echohl WarningMsg | echomsg 'Something went wrong with disassembly service (run). See Cxxd server log for more details!' | echohl None
     endif
 endfunction
 
@@ -220,10 +200,9 @@ function! cxxd#services#disassembly#asm_instruction_info()
     let s:asm_line = v:beval_lnum
     let s:asm_col = v:beval_col
     if v:beval_text != ''
-        python3 cxxd.api.disassembly_asm_doc(
-\                   server_handle,
-\                   vim.eval('v:beval_text')
-\               )
+        let l:service_payload = [0x3, v:beval_text]
+        let l:req = {'header': 0xF2, 'service_id': 0x5, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
     return ''
 endfunction

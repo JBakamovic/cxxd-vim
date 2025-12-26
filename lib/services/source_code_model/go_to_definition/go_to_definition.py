@@ -8,7 +8,6 @@ class VimGoToDefinition:
     def __call__(self, success, payload, definition):
         def call_vim_rpc(status, filename, line, column):
             Utils.call_vim_remote_function(
-                self.servername,
                 "cxxd#services#source_code_model#go_to_definition#run_callback(" + str(int(status)) + ", '" + filename + "', " + str(line) + ", " + str(column) + ")"
             )
 

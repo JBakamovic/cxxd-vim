@@ -1,6 +1,5 @@
-import socket
-from subprocess import call
-import shlex
+import json
+import sys
 
 file_type_dict = {
     'Cxx': ['.c', '.cpp', '.cc', '.h', '.hh', '.hpp'],
@@ -19,29 +18,11 @@ class Utils():
         return file_type_dict.get(programming_language, '')
 
     @staticmethod
-    def send_vim_remote_command(vim_instance, command):
-        cmd = 'gvim --servername ' + vim_instance + ' --remote-send "<ESC>' + command + '<CR>"'
-        return call(shlex.split(cmd))
-
-    @staticmethod
-    def call_vim_remote_function(vim_instance, function):
-        cmd = 'gvim --servername ' + vim_instance + ' --remote-expr "' + function + '"'
-        return call(shlex.split(cmd))
-
-    @staticmethod
-    def is_port_available(port):
-        s = socket.socket()
+    def call_vim_remote_function(function):
         try:
-            s.bind(('localhost', port))
-            s.close()
-            return True
-        except socket.error as msg:
-            s.close()
-            return False
-
-    @staticmethod
-    def get_available_port(port_begin, port_end):
-        for port in range(port_begin, port_end):
-            if Utils.is_port_available(port) == True:
-                return port
-        return -1
+            msg = {"exec": "call " + function}
+            sys.stdout.write(json.dumps(msg) + "\n")
+            sys.stdout.flush()
+        except Exception as e:
+            pass
+        return

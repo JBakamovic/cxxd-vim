@@ -9,19 +9,14 @@ function! cxxd#services#source_code_model#type_deduction#run()
         " any make sense then.
         if getbufvar(v:beval_bufnr, "&buftype") == ''
             let l:current_buffer = fnamemodify(bufname(v:beval_bufnr), ':p')
-
             " If buffer contents are modified but not saved, we need to serialize contents of the current buffer into temporary file.
             let l:contents_filename = cxxd#utils#pick_content_filename(l:current_buffer)
             if cxxd#utils#is_more_modifications_done(winnr('#'))
                 call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
             endif
-            python3 cxxd.api.source_code_model_type_deduction_request(
-\               server_handle,
-\               vim.eval('l:current_buffer'),
-\               vim.eval('l:contents_filename'),
-\               vim.eval('v:beval_lnum'),
-\               vim.eval('v:beval_col')
-\           )
+            let l:service_payload = [0x3, l:current_buffer, l:contents_filename, v:beval_lnum, v:beval_col]
+            let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+            call cxxd#server#send_request(l:req)
         endif
     endif
     return ''

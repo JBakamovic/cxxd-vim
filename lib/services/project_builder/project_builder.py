@@ -8,17 +8,16 @@ class VimProjectBuilder(ServicePlugin):
 
     def startup_callback(self, success, payload, startup_payload):
         output_build_file = str(startup_payload[0])
-        Utils.call_vim_remote_function(self.servername, "cxxd#services#project_builder#start_callback(" + str(int(success)) + ", '" + output_build_file + "')")
+        Utils.call_vim_remote_function("cxxd#services#project_builder#start_callback(" + str(int(success)) + ", '" + output_build_file + "')")
 
     def shutdown_callback(self, success, payload, shutdown_payload):
         reply_with_callback = bool(payload[0])
         if reply_with_callback:
-            Utils.call_vim_remote_function(self.servername, "cxxd#services#project_builder#stop_callback(" + str(int(success)) + ")")
+            Utils.call_vim_remote_function("cxxd#services#project_builder#stop_callback(" + str(int(success)) + ")")
 
     def __call__(self, success, payload, args):
         def call_vim_rpc(status, duration, build_exit_code, output):
             Utils.call_vim_remote_function(
-                self.servername,
                 "cxxd#services#project_builder#run_callback(" + str(int(status)) + ", '" + str(duration) + "', " + str(build_exit_code) + ", '" + output + "')"
             )
 

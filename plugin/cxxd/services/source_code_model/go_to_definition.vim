@@ -12,13 +12,10 @@ function! cxxd#services#source_code_model#go_to_definition#run(filename, line, c
         if cxxd#utils#is_more_modifications_done(winnr())
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
         endif
-        python3 cxxd.api.source_code_model_go_to_definition_request(
-\           server_handle,
-\           vim.eval('a:filename'),
-\           vim.eval('l:contents_filename'),
-\           vim.eval('a:line'),
-\           vim.eval('a:col')
-\       )
+        let l:service_payload = [0x4, a:filename, l:contents_filename, a:line, a:col]
+        let l:req = {'header': 0xF2, 'service_id': 0, 'payload': l:service_payload}
+
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
