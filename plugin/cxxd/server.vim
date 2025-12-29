@@ -2,6 +2,7 @@
 " Global job ID
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:cxxd_job_id = 0
+let s:cxxd_server_vim_path = expand('<sfile>:p')
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#server#start()
@@ -19,8 +20,14 @@ function! cxxd#server#start(project_root_directory, ...)
     endif
 
     " Determine path to lib/cxxd/main.py
-    let l:plugin_root = fnamemodify(fnamemodify(expand('<sfile>:p:h'), ':h'), ':h')
+    " plugin/cxxd/server.vim -> plugin/cxxd -> plugin -> root
+    let l:plugin_root = fnamemodify(s:cxxd_server_vim_path, ':h:h:h')
+    
+    " Debugging path resolution
+    echom "cxxd: plugin_root resolved to: " . l:plugin_root
+    
     let l:script_path = l:plugin_root . '/lib/cxxd/main.py'
+    echom "cxxd: script_path resolved to: " . l:script_path
     
     " Log file path
     let l:log_file = tempname() . '_cxxd_server.log'

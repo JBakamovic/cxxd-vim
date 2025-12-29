@@ -7,8 +7,8 @@ from utils import Utils
 class VimIndexer:
     def __init__(self, servername):
         self.servername = servername
-        self.find_all_references_output = os.path.join(tempfile.gettempdir(), self.servername + 'find_all_references')
-        self.fetch_all_diagnostics_output = os.path.join(tempfile.gettempdir(), self.servername + 'fetch_all_diagnostics')
+        self.find_all_references_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'find_all_references')
+        self.fetch_all_diagnostics_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'fetch_all_diagnostics')
         self.op = {
             SourceCodeModelIndexerRequestId.RUN_ON_SINGLE_FILE    : self.__run_on_single_file,
             SourceCodeModelIndexerRequestId.RUN_ON_DIRECTORY      : self.__run_on_directory,

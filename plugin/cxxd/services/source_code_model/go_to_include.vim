@@ -12,12 +12,10 @@ function! cxxd#services#source_code_model#go_to_include#run(filename, line, show
         if cxxd#utils#is_more_modifications_done(winnr())
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
         endif
-        python3 cxxd.api.source_code_model_go_to_include_request(
-\           server_handle,
-\           vim.eval('a:filename'),
-\           vim.eval('l:contents_filename'),
-\           vim.eval('a:line')
-\       )
+        " Go To Include Request: [0x5, filename, contents_filename, line]
+        let l:service_payload = [0x5, a:filename, l:contents_filename, a:line]
+        let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 

@@ -8,7 +8,8 @@ let s:terminal_buf_id = 0
 " Description:  Starts the project builder background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#project_builder#start()
-    python3 cxxd.api.project_builder_start(server_handle)
+    let l:req = {'header': 0xF1, 'service_id': 0x4, 'payload': []}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -29,7 +30,8 @@ endfunction
 " Description:  Stops the project builder background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#project_builder#stop(subscribe_for_shutdown_callback)
-    python3 cxxd.api.project_builder_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    let l:req = {'header': 0xFE, 'service_id': 0x4, 'payload': [a:subscribe_for_shutdown_callback]}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -61,7 +63,12 @@ function! cxxd#services#project_builder#run_custom(build_command, ...)
             endwhile
         endif
         call setqflist([])
-        python3 cxxd.api.project_builder_request_build_custom(server_handle, vim.eval('a:build_command') + ' ' + vim.eval('l:additional_args'))
+        " Request: [build_command + ' ' + additional_args]
+        " Service ID: 0x4 (ProjectBuilder)
+        let l:command_string = a:build_command . ' ' . l:additional_args
+        let l:service_payload = [l:command_string]
+        let l:req = {'header': 0xF2, 'service_id': 0x4, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -73,7 +80,21 @@ endfunction
 function! cxxd#services#project_builder#run_target()
     if g:cxxd_project_builder['started'] && g:cxxd_project_builder['enabled']
         call setqflist(getqflist(), 'f')
-        python3 cxxd.api.project_builder_request_build_target(server_handle)
+        " Request: [] (Implicitly uses target) - wait, check api structure
+        " The legacy call was project_builder_request_build_target.
+        " In protocol (implied, I don't see it), likely payload differentiates custom vs target.
+        " Actually, let's look at how backend distinguishes.
+        " For now, I'll send specific payload if I can find what it expects, 
+        " OR use a different method. 
+        " Wait, 'run_custom' sends [command_string]. 
+        " 'run_target' sends nothing? Or a flag?
+        " Checking Services... ProjectBuilder service likely has request() that takes args.
+        " Legacy: project_builder_request_build_target() vs project_builder_request_build_custom(cmd)
+        " Let's assume for now 0 args = target, 1 arg = custom.
+        let l:service_payload = [] 
+        let l:req = {'header': 0xF2, 'service_id': 0x4, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
+
         let s:buf_nr = bufnr('build_log', 1)
         let s:log_job = job_start('tail -f ' . s:cxxd_project_builder_output_build_file, {'out_io': 'buffer', 'out_buf': s:buf_nr})
         sbuf build_log

@@ -3,7 +3,8 @@
 " Description:  Starts the clang-tidy background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_tidy#start()
-    python3 cxxd.api.clang_tidy_start(server_handle)
+    let l:req = {'header': 0xF1, 'service_id': 0x3, 'payload': []}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -23,7 +24,8 @@ endfunction
 " Description:  Stops the clang-tidy background service.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_tidy#stop(subscribe_for_shutdown_callback)
-    python3 cxxd.api.clang_tidy_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    let l:req = {'header': 0xFE, 'service_id': 0x3, 'payload': [a:subscribe_for_shutdown_callback]}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -44,7 +46,11 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#clang_tidy#run(filename, apply_fixes)
     if g:cxxd_clang_tidy['started'] && g:cxxd_clang_tidy['enabled']
-        python3 cxxd.api.clang_tidy_request(server_handle, vim.eval('a:filename'), vim.eval('a:apply_fixes'))
+        " Request: [filename, apply_fixes]
+        " Service ID: 0x3 (ClangTidy)
+        let l:service_payload = [a:filename, a:apply_fixes]
+        let l:req = {'header': 0xF2, 'service_id': 0x3, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 

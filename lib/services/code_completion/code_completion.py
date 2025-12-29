@@ -10,7 +10,7 @@ from cxxd.services.code_completion.code_completion import CodeCompletionRequestI
 class VimCodeCompletion(ServicePlugin):
     def __init__(self, servername):
         self.servername = servername
-        self.code_complete_candidates_output = os.path.join(tempfile.gettempdir(), self.servername + 'code_complete_candidates')
+        self.code_complete_candidates_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'code_complete_candidates')
 
     def _create_vim_complete_item(self, candidate, detailed_candidate, kind, result_type, extra_documentation = None):
         return {

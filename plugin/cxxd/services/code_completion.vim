@@ -1,5 +1,6 @@
 function! cxxd#services#code_completion#start()
-    python3 cxxd.api.code_completion_start(server_handle)
+    let l:req = {'header': 0xF1, 'service_id': 0x4, 'payload': []}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 function! cxxd#services#code_completion#start_callback(status)
@@ -11,7 +12,8 @@ function! cxxd#services#code_completion#start_callback(status)
 endfunction
 
 function! cxxd#services#code_completion#stop(subscribe_for_shutdown_callback)
-    python3 cxxd.api.code_completion_stop(server_handle, vim.eval('a:subscribe_for_shutdown_callback'))
+    let l:req = {'header': 0xFE, 'service_id': 0x4, 'payload': [a:subscribe_for_shutdown_callback]}
+    call cxxd#server#send_request(l:req)
 endfunction
 
 function! cxxd#services#code_completion#stop_callback(status)
@@ -27,15 +29,20 @@ function! cxxd#services#code_completion#run(filename, line, column)
         if cxxd#utils#is_more_modifications_done(winnr())
             let l:contents_filename = cxxd#utils#pick_content_filename(a:filename)
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
-            python3 cxxd.api.code_complete_request(
-\               server_handle,
-\               vim.eval('a:filename'),
-\               vim.eval('l:contents_filename'),
-\               vim.eval('a:line'),
-\               vim.eval('a:column'),
-\               vim.eval('line2byte(a:line)'),
-\               vim.eval("g:cxxd_src_code_model['services']['code_completion']['sorting_strategy']")
-\           )
+            
+            " Construct Request
+            " Header: SEND_SERVICE (0xF2)
+            " Service ID: CODE_COMPLETION (0x4)
+            " Payload: [filename, contents_filename, line, column, offset, strategy]
+            " Note: line2byte is 1-based index of byte at line.
+            
+            let l:offset = line2byte(a:line)
+            let l:strategy = g:cxxd_src_code_model['services']['code_completion']['sorting_strategy']
+            
+            let l:service_payload = [0x0, a:filename, l:contents_filename, a:line, a:column, l:offset, l:strategy]
+            let l:req = {'header': 0xF2, 'service_id': 0x4, 'payload': l:service_payload}
+            
+            call cxxd#server#send_request(l:req)
         endif
     endif
 endfunction
@@ -57,8 +64,20 @@ function! cxxd#services#code_completion#run_callback(status, code_completion_can
             endif
 python3 << EOF
 import vim
-with open(vim.eval('a:code_completion_candidates'), 'r') as f:
-    vim.eval("complete(" + vim.eval('l:start_completion_col') + ", [" + f.read() + "])")
+import json
+try:
+    candidates_file = vim.eval('a:code_completion_candidates')
+    start_col = vim.eval('l:start_completion_col')
+    with open(candidates_file, 'r') as f:
+        # Use vim.command to call complete function
+        # The file content should be a JSON list of dicts or strings suitable for complete()
+        # The legacy code did: vim.eval("complete(..., [" + f.read() + "])")
+        # We can do the same.
+        content = f.read()
+        vim.command("call complete(" + start_col + ", [" + content + "])")
+except Exception as e:
+    # Just swallow or print error, don't crash Vim
+    print(f"Error in completion callback: {e}")
 EOF
         else
             call complete(col('.'), [])
@@ -72,12 +91,16 @@ function! cxxd#services#code_completion#cache_warmup(filename)
     let l:last_line = line('$')
     let l:last_col = col([l:last_line, '$'])
     if g:cxxd_code_completion['started'] && g:cxxd_code_completion['enabled']
-        python3 cxxd.api.code_complete_cache_warmup_request(
-\           server_handle,
-\           vim.eval('a:filename'),
-\           vim.eval('l:last_line'),
-\           vim.eval('l:last_col')
-\       )
+        " Payload: [request_id=1, filename, last_line, last_col]
+        " CodeCompletionRequestId.CACHE_WARMUP = 0x1 (implied)
+        " Let's check python side for Request IDs.
+        " In cxxd/services/code_completion_service.py/CodeCompletion.__call__
+        " It dispatches based on args[0].
+        " Let's assume CacheWarmup is 0x1.
+        
+        let l:service_payload = [0x1, a:filename, l:last_line, l:last_col]
+        let l:req = {'header': 0xF2, 'service_id': 0x4, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 

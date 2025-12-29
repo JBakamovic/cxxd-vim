@@ -35,7 +35,11 @@ endfunction
 " Description:  Handles stderr output (NEOVIM).
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#job#stderr_handler(job_id, data, event)
-    " For now, just echo if critical
+    for l:line in a:data
+        if l:line != ''
+            echohl ErrorMsg | echom "cxxd server error: " . l:line | echohl None
+        endif
+    endfor
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -43,7 +47,7 @@ endfunction
 " Description:  Handles stderr output (VIM 8).
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#job#vim8_stderr_handler(channel, msg)
-    " For now, just echo if critical
+    echohl ErrorMsg | echom "cxxd server error: " . a:msg | echohl None
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -66,7 +70,9 @@ endfunction
 function! s:process_message(json_str)
     try
         let l:msg = json_decode(a:json_str)
-        if has_key(l:msg, 'call')
+        if has_key(l:msg, 'exec')
+            execute l:msg.exec
+        elseif has_key(l:msg, 'call')
             let l:start_idx = stridx(l:msg.call, '(')
             if l:start_idx == -1
                 " Simple function name, args separate

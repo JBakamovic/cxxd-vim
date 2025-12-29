@@ -1,6 +1,7 @@
 import logging
 import os
 import tempfile
+import json
 from utils import Utils
 from cxxd.service_plugin import ServicePlugin
 from cxxd.services.disassembly_service import DisassemblyRequestId
@@ -8,8 +9,8 @@ from cxxd.services.disassembly_service import DisassemblyRequestId
 class VimDisassembly(ServicePlugin):
     def __init__(self, servername):
         self.servername = servername
-        self.disassembly_target_candidates_output = os.path.join(tempfile.gettempdir(), self.servername + 'disassembly_target_candidates')
-        self.disassembly_symbol_candidates_output = os.path.join(tempfile.gettempdir(), self.servername + 'disassembly_symbol_candidates')
+        self.disassembly_target_candidates_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'disassembly_target_candidates')
+        self.disassembly_symbol_candidates_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'disassembly_symbol_candidates')
 
     def startup_callback(self, success, payload, startup_payload):
         Utils.call_vim_remote_function(self.servername, "cxxd#services#disassembly#start_callback(" + str(int(success)) + ")")
@@ -51,6 +52,7 @@ class VimDisassembly(ServicePlugin):
 
         symbol_candidates = args
         with open(self.disassembly_symbol_candidates_output, 'w') as f:
+            #f.write(json.dumps([make_popup_item(item) for item in symbol_candidates]))
             f.writelines(', '.join(str("'" + make_popup_item(item) + "'") for item in symbol_candidates))
         Utils.call_vim_remote_function(
             self.servername,

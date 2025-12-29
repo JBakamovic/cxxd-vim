@@ -4,16 +4,15 @@
 if exists("g:loaded_cxxdvim")
     finish
 else
-    if !has("clientserver")
+    if !has("job") && !has("nvim")
         echohl WarningMsg |
-            \ echoerr "cxxd-vim requires (G)Vim compiled with 'clientserver' feature.".
-            \         " TL;DR Use GVim. Non-gui versions of Vim are usually not distributed with 'clientserver' feature compiled in." |
+            \ echoerr "cxxd-vim requires (G)Vim compiled with 'job' feature or Neovim." |
             \ echohl None
         call feedkeys("\<CR>")
         finish
     elseif !has("python3")
         echohl WarningMsg |
-            \ echoerr "cxxd-vim requires (G)Vim compiled with 'python' feature." |
+            \ echoerr "cxxd-vim requires (G)Vim compiled with 'python3' feature." |
             \ echohl None
         call feedkeys("\<CR>")
         finish

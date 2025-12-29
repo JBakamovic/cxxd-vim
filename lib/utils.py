@@ -25,6 +25,17 @@ class Utils():
 
     @staticmethod
     def call_vim_remote_function(vim_instance, function):
+        if vim_instance is None:
+            import sys, json
+            # Job Mode fallback: execute the function call via JSON protocol
+            try:
+                msg = {"exec": "call " + function}
+                sys.stdout.write(json.dumps(msg) + "\n")
+                sys.stdout.flush()
+            except Exception as e:
+                pass # logging might not be safe/available here
+            return
+
         cmd = 'gvim --servername ' + vim_instance + ' --remote-expr "' + function + '"'
         return call(shlex.split(cmd))
 

@@ -2,12 +2,16 @@
 " Function:     cxxd#services#source_code_model#indexer#run_on_single_file()
 " Description:  Runs indexer on a single file.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#indexer#run_on_single_file()
+" Description:  Runs indexer on a single file.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#run_on_single_file(filename)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python3 cxxd.api.source_code_model_indexer_run_on_single_file_request(
-\           server_handle,
-\           vim.eval('a:filename')
-\       )
+        " Run on single file: [0x0 (Indexer), 0x0 (RunOnSingleFile), filename]
+        let l:service_payload = [0x0, 0x0, a:filename]
+        let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -27,8 +31,10 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#run_on_directory()
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        echomsg 'Indexing started ... It may take a while if it is run for the first time.'
-        python3 cxxd.api.source_code_model_indexer_run_on_directory_request(server_handle)
+        " Run on directory: [0x0 (Indexer), 0x1 (RunOnDirectory)]
+        let l:service_payload = [0x0, 0x1]
+        let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -38,14 +44,14 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#run_on_directory_callback(status)
     if a:status == v:true
-        echomsg 'Indexing successfully completed.'
-        echomsg g:cxxd_fetch_all_diagnostics_upon_startup
+        " Only print if it was actually doing something? 
+        " The server will tell us via callback when it finishes.
+        " If it finishes instantly, maybe it was cached.
+        echomsg 'Indexing finished.'
         if g:cxxd_fetch_all_diagnostics_upon_startup != 0
             call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(
 \               g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc']
 \           )
-        else
-            echohl WarningMsg | echomsg 'I fucking dont want this diagnostics!' | echohl None
         endif
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-run-on-directory) service. See Cxxd server log for more details!' | echohl None
@@ -58,7 +64,10 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#drop_single_file(filename)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python3 cxxd.api.source_code_model_indexer_drop_single_file_request(server_handle, vim.eval('a:filename'))
+        " Drop single file: [0x0 (Indexer), 0x2 (DropSingleFile), filename]
+        let l:service_payload = [0x0, 0x2, a:filename]
+        let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -78,7 +87,10 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#drop_all()
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python3 cxxd.api.source_code_model_indexer_drop_all_request(server_handle, True)
+        " Drop all: [0x0 (Indexer), 0x3 (DropAll), True]
+        let l:service_payload = [0x0, 0x3, v:true]
+        let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -101,7 +113,13 @@ endfunction
 function! cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
         echomsg 'About to drop symbol database and re-run the source code indexer ...'
-        python3 cxxd.api.source_code_model_indexer_drop_all_and_run_on_directory_request(server_handle)
+        call cxxd#services#source_code_model#indexer#drop_all()
+        " Note: drop_all is async. Running run_on_directory immediately might race.
+        " Ideally we chain them via callbacks. 
+        " But for now keeping simple logic. The server processes queues sequentially?
+        " Yes, server_queue is sequential.
+        
+        call cxxd#services#source_code_model#indexer#run_on_directory()
     endif
 endfunction
 
@@ -116,12 +134,12 @@ function! cxxd#services#source_code_model#indexer#find_all_references(filename, 
         if cxxd#utils#is_more_modifications_done(winnr())
             call cxxd#utils#serialize_current_buffer_contents(l:contents_filename)
         endif
-        python3 cxxd.api.source_code_model_indexer_find_all_references_request(
-\           server_handle,
-\           vim.eval('l:contents_filename'),
-\           vim.eval('a:line'),
-\           vim.eval('a:col')
-\       )
+        
+        " Find All References: [0x0 (Indexer), 0x10 (FindAllRefs), filename, line, col]
+        " SourceCodeModelIndexerRequestId.FIND_ALL_REFERENCES = 0x10
+        let l:service_payload = [0x0, 0x10, l:contents_filename, a:line, a:col]
+        let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -133,8 +151,15 @@ function! cxxd#services#source_code_model#indexer#find_all_references_callback(s
     if a:status == v:true
 python3 << EOF
 import vim
-with open(vim.eval('a:references'), 'r') as f:
-    vim.eval("setqflist([" + f.read() + "], 'r')")
+import json
+try:
+    references_file = vim.eval('a:references')
+    with open(references_file, 'r') as f:
+        # Assuming references is a path to a file containing JSON or Python list string
+        content = f.read()
+        vim.command("call setqflist([" + content + "], 'r')")
+except Exception as e:
+    print(f"Error in find_all_references callback: {e}")
 EOF
         execute('copen')
         redraw
@@ -149,10 +174,11 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#fetch_all_diagnostics(fetch_sorting_strategy)
     if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
-        python3 cxxd.api.source_code_model_indexer_fetch_all_diagnostics_request(
-\           server_handle,
-\           vim.eval("a:fetch_sorting_strategy")
-\       )
+        " Fetch All Diagnostics: [0x0 (Indexer), 0x11 (FetchAllDiagnostics), sorting_strategy]
+        " SourceCodeModelIndexerRequestId.FETCH_ALL_DIAGNOSTICS = 0x11
+        let l:service_payload = [0x0, 0x11, a:fetch_sorting_strategy]
+        let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
     endif
 endfunction
 
@@ -169,13 +195,21 @@ function! cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback
         endif
 python3 << EOF
 import vim
-with open(vim.eval('a:diagnostics'), 'r') as f:
-    vim.eval("setqflist([" + f.read() + "], 'r')")
+import json
+try:
+    diag_file = vim.eval('a:diagnostics')
+    with open(diag_file, 'r') as f:
+        content = f.read()
+        vim.command("call setqflist([" + content + "], 'r')")
+except Exception as e:
+    print(f"Error in fetch_diagnostics callback: {e}")
 EOF
-        execute('copen')
+        " execute('copen')
         redraw
     else
         echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-fetch-all-diagnostics) service. See Cxxd server log for more details!' | echohl None
     endif
 endfunction
+
+
 
