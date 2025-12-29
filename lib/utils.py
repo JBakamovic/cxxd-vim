@@ -20,6 +20,19 @@ class Utils():
 
     @staticmethod
     def send_vim_remote_command(vim_instance, command):
+        if vim_instance is None:
+            # In Job mode, we can't easily "send keys" like --remote-send.
+            # We could try to use remote-expr with 'feedkeys()', but it's tricky.
+            # For now, let's just log or ignore, or treat it as an expr call if possible.
+            # But wait, this method is usually for sending <ESC> etc.
+            # If we are in Job mode, maybe we don't need this?
+            # Let's just avoid the crash.
+            import logging
+            import logging
+            logging.warn("send_vim_remote_command called with None instance (Job mode). command ignored.")
+            return
+            return
+
         cmd = 'gvim --servername ' + vim_instance + ' --remote-send "<ESC>' + command + '<CR>"'
         return call(shlex.split(cmd))
 

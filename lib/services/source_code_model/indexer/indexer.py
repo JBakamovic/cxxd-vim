@@ -1,6 +1,6 @@
 import logging
 import os
-import tempfile
+
 import json
 from cxxd.services.source_code_model.indexer.clang_indexer import SourceCodeModelIndexerRequestId
 from utils import Utils

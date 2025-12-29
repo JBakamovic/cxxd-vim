@@ -22,6 +22,8 @@ class VimClangTidy(ServicePlugin):
             )
 
         if success:
+            if clang_tidy_output is None:
+                return
             call_vim_rpc(success, payload[0], payload[1], clang_tidy_output)
         else:
             call_vim_rpc(success, payload[0], payload[1], '')

@@ -58,14 +58,15 @@ endfunction
 " Function:     cxxd#services#clang_tidy#run_callback()
 " Description:  Display the results of clang-tidy.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#clang_tidy#run_callback(status, filename, fixes_applied, clang_tidy_output)
+function! cxxd#services#clang_tidy#run_callback(status, filename, fixes_applied, clang_tidy_lines)
     if a:status == v:true
         if a:fixes_applied
             " TODO Ideally, re-indexing logic shall not be client's code (frontend) responsibility. We need to enable communication
             " between components on Cxxd server level.
             call cxxd#services#source_code_model#indexer#run_on_single_file(a:filename)
         endif
-        execute('cgetfile ' . a:clang_tidy_output)
+        " Use cgetexpr to populate quickfix list from the list of lines
+        cexpr a:clang_tidy_lines
         execute('copen')
         redraw
     else
