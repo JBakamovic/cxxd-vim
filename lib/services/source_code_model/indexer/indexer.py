@@ -8,7 +8,6 @@ from utils import Utils
 class VimIndexer:
     def __init__(self, servername):
         self.servername = servername
-        self.fetch_all_diagnostics_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'fetch_all_diagnostics')
         self.op = {
             SourceCodeModelIndexerRequestId.RUN_ON_SINGLE_FILE    : self.__run_on_single_file,
             SourceCodeModelIndexerRequestId.RUN_ON_DIRECTORY      : self.__run_on_directory,
@@ -91,19 +90,18 @@ class VimIndexer:
         quickfix_list = []
         for diag in diagnostics:
             filename, line, column, description, severity = diag
-            quickfix_list.append(
-                "{'filename': '" + filename + "', " +
-                "'lnum': '" + str(line) + "', " +
-                "'col': '" + str(column) + "', " +
-                "'type': '" + clang_severity_to_quickfix_type(severity) + "', " +
-                "'text': '" + description.replace("'", r"''").rstrip() + "'}"
-            )
+            quickfix_list.append({
+                'filename': filename,
+                'lnum': line,
+                'col': column,
+                'type': clang_severity_to_quickfix_type(severity),
+                'text': description.rstrip()
+            })
 
-        with open(self.fetch_all_diagnostics_output, 'w') as f:
-            f.writelines(', '.join(item for item in quickfix_list))
+        json_diagnostics = json.dumps(quickfix_list)
 
         Utils.call_vim_remote_function(
             self.servername,
-            "cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback(" + str(int(success)) + ", '" + self.fetch_all_diagnostics_output + "')"
+            "cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback(" + str(int(success)) + ", " + json_diagnostics + ")"
         )
         logging.debug("Diagnostics: " + str(quickfix_list))

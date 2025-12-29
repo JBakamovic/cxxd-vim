@@ -182,17 +182,7 @@ function! cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback
         else
             echohl MoreMsg | echomsg 'Kewl. No issues were found with the code.' | echohl None
         endif
-python3 << EOF
-import vim
-import json
-try:
-    diag_file = vim.eval('a:diagnostics')
-    with open(diag_file, 'r') as f:
-        content = f.read()
-        vim.command("call setqflist([" + content + "], 'r')")
-except Exception as e:
-    print(f"Error in fetch_diagnostics callback: {e}")
-EOF
+        call setqflist(a:diagnostics, 'r')
         " execute('copen')
         redraw
     else
