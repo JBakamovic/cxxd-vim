@@ -28,7 +28,6 @@ class VimSemanticSyntaxHighlight:
         def call_vim_rpc(status, filename, highlights):
             json_highlights = json.dumps(highlights)
             Utils.call_vim_remote_function(
-                self.servername,
                 "cxxd#services#source_code_model#semantic_syntax_highlight#run_callback(" + str(int(status)) + ", '" + filename + "'" + ", " + json_highlights + ")"
             )
 

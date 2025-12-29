@@ -7,14 +7,16 @@ class VimClangFormat(ServicePlugin):
         self.servername = servername
 
     def startup_callback(self, success, payload, startup_payload):
-        Utils.call_vim_remote_function(self.servername, "cxxd#services#clang_format#start_callback(" + str(int(success)) + ")")
+        Utils.call_vim_remote_function("cxxd#services#clang_format#start_callback(" + str(int(success)) + ")")
 
     def shutdown_callback(self, success, payload, shutdown_payload):
         reply_with_callback = bool(payload[0])
         if reply_with_callback:
-            Utils.call_vim_remote_function(self.servername, "cxxd#services#clang_format#stop_callback(" + str(int(success)) + ")")
+            Utils.call_vim_remote_function("cxxd#services#clang_format#stop_callback(" + str(int(success)) + ")")
 
     def __call__(self, success, payload, args):
         if not success:
             logging.error("Something went wrong with clang-format ... success={0}, payload={1}, args={2}.".format(success, payload, args))
-        Utils.call_vim_remote_function(self.servername, "cxxd#services#clang_format#run_callback(" + str(int(success)) + ", '" + payload[0] + "')")
+        def call_vim_rpc(status, payload):
+            Utils.call_vim_remote_function("cxxd#services#clang_format#run_callback(" + str(int(status)) + ", '" + payload[0] + "')")
+        call_vim_rpc(success, payload)

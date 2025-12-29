@@ -22,7 +22,6 @@ class VimSourceCodeModel(ServicePlugin):
 
     def startup_callback(self, success, payload, startup_payload):
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#start_callback(" + str(int(success)) + ")"
         )
 
@@ -30,7 +29,6 @@ class VimSourceCodeModel(ServicePlugin):
         reply_with_callback = bool(payload[0])
         if reply_with_callback:
             Utils.call_vim_remote_function(
-                self.servername,
                 "cxxd#services#source_code_model#stop_callback(" + str(int(success)) + ")"
             )
 

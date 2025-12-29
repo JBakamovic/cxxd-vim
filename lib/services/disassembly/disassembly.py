@@ -9,12 +9,12 @@ class VimDisassembly(ServicePlugin):
         self.servername = servername
 
     def startup_callback(self, success, payload, startup_payload):
-        Utils.call_vim_remote_function(self.servername, "cxxd#services#disassembly#start_callback(" + str(int(success)) + ")")
+        Utils.call_vim_remote_function("cxxd#services#disassembly#start_callback(" + str(int(success)) + ")")
 
     def shutdown_callback(self, success, payload, shutdown_payload):
         reply_with_callback = bool(payload[0])
         if reply_with_callback:
-            Utils.call_vim_remote_function(self.servername, "cxxd#services#disassembly#stop_callback(" + str(int(success)) + ")")
+            Utils.call_vim_remote_function("cxxd#services#disassembly#stop_callback(" + str(int(success)) + ")")
 
     def __call__(self, success, payload, args):
         disassembly_op_id = int(payload[0])
@@ -35,7 +35,6 @@ class VimDisassembly(ServicePlugin):
         # Note: We strip whitespace (newlines) from the raw backend candidates
         json_targets = json.dumps([item.strip() for item in target_candidates])
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#disassembly#pick_target_callback(" + str(int(success)) + ", " + json_targets + ")"
         )
 
@@ -51,14 +50,12 @@ class VimDisassembly(ServicePlugin):
         symbol_candidates = args
         json_symbols = json.dumps([make_popup_item(item) for item in symbol_candidates])
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#disassembly#pick_symbol_callback(" + str(int(success)) + ", " + json_symbols + ")"
         )
 
     def _disassemble(self, success, payload, args):
         disassembly_output, addr, offset = args
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#disassembly#run_callback(" + str(int(success)) + ", '" + str(disassembly_output) + "', '" + str(addr) + "', '" + str(offset) + "')"
         )
 
@@ -67,6 +64,5 @@ class VimDisassembly(ServicePlugin):
         description = args[1]
         url = args[2]
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#disassembly#asm_instruction_info_callback(" + str(int(success)) + ", '" + str(tooltip) + "', '" + str(description) + "', '" + str(url) + "')"
         )

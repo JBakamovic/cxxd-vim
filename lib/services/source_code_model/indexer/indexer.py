@@ -25,25 +25,22 @@ class VimIndexer:
 
     def __run_on_single_file(self, success, args):
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#indexer#run_on_single_file_callback(" + str(int(success)) + ")"
         )
 
     def __run_on_directory(self, success, args):
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#indexer#run_on_directory_callback(" + str(int(success)) + ")"
         )
 
     def __drop_single_file(self, success, args):
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#indexer#drop_single_file_callback(" + str(int(success)) + ")"
         )
 
     def __drop_all(self, success, args):
         Utils.call_vim_remote_function(
-            self.servername, "cxxd#services#source_code_model#indexer#drop_all_callback(" + str(int(success)) + ")"
+            "cxxd#services#source_code_model#indexer#drop_all_callback(" + str(int(success)) + ")"
         )
 
     def __find_all_references(self, success, references):
@@ -62,7 +59,6 @@ class VimIndexer:
         json_references = json.dumps(quickfix_list)
 
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#indexer#find_all_references_callback(" + str(int(success)) + ", " + json_references + ")"
         )
         logging.debug("References: " + str(quickfix_list))
@@ -101,7 +97,6 @@ class VimIndexer:
         json_diagnostics = json.dumps(quickfix_list)
 
         Utils.call_vim_remote_function(
-            self.servername,
             "cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback(" + str(int(success)) + ", " + json_diagnostics + ")"
         )
         logging.debug("Diagnostics: " + str(quickfix_list))

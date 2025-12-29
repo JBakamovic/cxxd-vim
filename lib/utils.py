@@ -1,6 +1,4 @@
-import socket
-from subprocess import call
-import shlex
+
 
 file_type_dict = {
     'Cxx': ['.c', '.cpp', '.cc', '.h', '.hh', '.hpp'],
@@ -19,52 +17,14 @@ class Utils():
         return file_type_dict.get(programming_language, '')
 
     @staticmethod
-    def send_vim_remote_command(vim_instance, command):
-        if vim_instance is None:
-            # In Job mode, we can't easily "send keys" like --remote-send.
-            # We could try to use remote-expr with 'feedkeys()', but it's tricky.
-            # For now, let's just log or ignore, or treat it as an expr call if possible.
-            # But wait, this method is usually for sending <ESC> etc.
-            # If we are in Job mode, maybe we don't need this?
-            # Let's just avoid the crash.
-            import logging
-            import logging
-            logging.warn("send_vim_remote_command called with None instance (Job mode). command ignored.")
-            return
-            return
-
-        cmd = 'gvim --servername ' + vim_instance + ' --remote-send "<ESC>' + command + '<CR>"'
-        return call(shlex.split(cmd))
-
-    @staticmethod
-    def call_vim_remote_function(vim_instance, function):
-        if vim_instance is None:
-            import sys, json
-            # Job Mode fallback: execute the function call via JSON protocol
-            try:
-                msg = {"exec": "call " + function}
-                sys.stdout.write(json.dumps(msg) + "\n")
-                sys.stdout.flush()
-            except Exception as e:
-                pass # logging might not be safe/available here
-            return
-
-        return call(['gvim', '--servername', vim_instance, '--remote-expr', function])
-
-    @staticmethod
-    def is_port_available(port):
-        s = socket.socket()
+    def call_vim_remote_function(function):
+        # In Job mode, vim_instance is typically None or we ignore it.
+        # We exclusively use the JSON-over-Standard-IO mechanism.
+        import sys, json
         try:
-            s.bind(('localhost', port))
-            s.close()
-            return True
-        except socket.error as msg:
-            s.close()
-            return False
-
-    @staticmethod
-    def get_available_port(port_begin, port_end):
-        for port in range(port_begin, port_end):
-            if Utils.is_port_available(port) == True:
-                return port
-        return -1
+            msg = {"exec": "call " + function}
+            sys.stdout.write(json.dumps(msg) + "\n")
+            sys.stdout.flush()
+        except Exception as e:
+            pass
+        return
