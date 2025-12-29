@@ -28,19 +28,36 @@ endfunction
 " Function:     cxxd#services#source_code_model#semantic_syntax_highlight#run_callback()
 " Description:  Apply the results of source code highlighting for given filename.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#source_code_model#semantic_syntax_highlight#run_callback(status, filename, syntax_file)
+function! cxxd#services#source_code_model#semantic_syntax_highlight#run_callback(status, filename, highlights)
     if a:status == v:true
         let l:current_buffer = expand('%:p')
         if l:current_buffer == a:filename
             " Clear all previously added matches
+            " Clear all previously added matches
             call clearmatches()
 
             " Apply the syntax highlighting rules
-            execute('source ' . a:syntax_file)
+            " a:highlights is a Dict: { 'Group': [[line, col, len], ...], ... }
+            if !empty(a:highlights)
+                for [l:group, l:positions] in items(a:highlights)
+                    " matchaddpos expects a list of positions where each is [lnum, col, len]
+                    " LIMIT: matchaddpos accepts up to 8 positions. We must chunk.
+                    let l:i = 0
+                    let l:pos_len = len(l:positions)
+                    while l:i < l:pos_len
+                        let l:chunk = l:positions[l:i : l:i + 7]
+                        try
+                             call matchaddpos(l:group, l:chunk)
+                        catch
+                            " Be resilient against invalid positions
+                        endtry
+                        let l:i += 8
+                    endwhile
+                endfor
+            endif
 
             " Following command is a quick hack to apply the new syntax for
-            " the given buffer. I haven't found any other more viable way to do it 
-            " while keeping it fast & low on resources,
+            " the given buffer.
             execute(':redrawstatus')
         endif
     else

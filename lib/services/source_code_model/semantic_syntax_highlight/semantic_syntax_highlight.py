@@ -5,66 +5,43 @@ from cxxd.parser.ast_node_identifier import ASTNodeId
 from cxxd.parser.ctags_parser import CtagsTokenizer
 
 class VimSemanticSyntaxHighlight:
-    def __init__(self, servername, output_syntax_file):
+    def __init__(self, servername):
         self.servername = servername
-        self.output_syntax_file = output_syntax_file
 
     def __call__(self, success, payload, args):
-        class VimHlMatch:
-            def __init__(self, group, line, column, length):
-                self.group = group
-                self.line = line
-                self.column = column
-                self.length = length
+        import json
+        from collections import defaultdict
 
-            def __hash__(self):
-                return hash((self.group, self.line, self.column, self.length))
+        # Group matches by syntax group
+        # keys: syntax group (str), values: list of [line, col, len]
+        vim_syntax_matches = defaultdict(list)
 
-            def __eq__(self, other):
-                if self.group == other.group and self.line == other.line and self.column == other.column and self.length == other.length:
-                    return True
-                return False
-
-        def create_clearmatches_pattern():
-            return "call clearmatches()"
-
-        def create_matchaddpos_pattern(hl_match):
-            return "call matchaddpos('" + hl_match.group + "', [[" + str(hl_match.line) + ", " + str(hl_match.column) + ", " + str(hl_match.length) + "]])"
-
-        def callback(ast_node_id, ast_node_name, ast_node_line, ast_node_column, syntax):
-            syntax.add(
-                VimHlMatch(
-                    VimSemanticSyntaxHighlight.__tag_id_to_vim_syntax_group(ast_node_id),
+        def callback(ast_node_id, ast_node_name, ast_node_line, ast_node_column, syntax_matches):
+            group = VimSemanticSyntaxHighlight.__tag_id_to_vim_syntax_group(ast_node_id)
+            if group:
+                syntax_matches[group].append([
                     ast_node_line,
                     ast_node_column,
                     len(ast_node_name)
-                )
-            )
+                ])
 
-        def call_vim_rpc(status, filename, syntax_file):
+        def call_vim_rpc(status, filename, highlights):
+            json_highlights = json.dumps(highlights)
             Utils.call_vim_remote_function(
                 self.servername,
-                "cxxd#services#source_code_model#semantic_syntax_highlight#run_callback(" + str(int(status)) + ", '" + filename + "'" + ", '" + syntax_file + "')"
+                "cxxd#services#source_code_model#semantic_syntax_highlight#run_callback(" + str(int(status)) + ", '" + filename + "'" + ", " + json_highlights + ")"
             )
 
         if success:
             # Unpack the parameters
             tunit, line_begin, line_end, traverse = args
 
-            # Build Vim syntax highlight rules
-            vim_syntax_hl_patterns = set()
-            traverse(tunit, line_begin, line_end, callback, vim_syntax_hl_patterns)
+            traverse(tunit, int(line_begin), int(line_end), callback, vim_syntax_matches)
 
-            # Write Vim syntax file
-            with open(self.output_syntax_file, "w") as vim_syntax_file:
-                vim_syntax_file.write(create_clearmatches_pattern() + '\n')                 # TODO 'vim_syntax_hl_patterns' is an unordered set and therefore resulting
-                for hl_pattern in vim_syntax_hl_patterns:                                   #       vim syntax file will contain 'matchaddpos' entries which are not
-                    vim_syntax_file.write(create_matchaddpos_pattern(hl_pattern) + '\n')    #       going to be ordered by [line, column]. It needs to be checked if
-
-            # Apply newly generated syntax rules
-            call_vim_rpc(success, payload[1], self.output_syntax_file)
+            # Stream highlights
+            call_vim_rpc(success, payload[1], vim_syntax_matches)
         else:
-            call_vim_rpc(success, '', '')
+            call_vim_rpc(success, '', {})
             logging.error('Something went wrong in semantic syntax highlighting service ... Payload={0} Args={1}'.format(payload, args))
 
     def generate_vim_syntax_file_from_ctags(self, filename):

@@ -1,5 +1,4 @@
 import logging
-import tempfile
 import os
 from utils import Utils
 from cxxd.service_plugin import ServicePlugin
@@ -15,7 +14,7 @@ class VimSourceCodeModel(ServicePlugin):
     def __init__(self, servername):
         self.servername = servername
         self.indexer = VimIndexer(self.servername)
-        self.semantic_syntax_higlight = VimSemanticSyntaxHighlight(self.servername, tempfile.gettempdir() + os.sep + str(self.servername) + '_syntax_file.vim')
+        self.semantic_syntax_higlight = VimSemanticSyntaxHighlight(self.servername)
         self.diagnostics = VimDiagnostics(self.servername)
         self.type_deduction = VimTypeDeduction(self.servername)
         self.go_to_definition = VimGoToDefinition(self.servername)
