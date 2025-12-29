@@ -1,6 +1,4 @@
 import logging
-import os
-import tempfile
 import json
 from utils import Utils
 from cxxd.service_plugin import ServicePlugin
@@ -9,8 +7,6 @@ from cxxd.services.disassembly_service import DisassemblyRequestId
 class VimDisassembly(ServicePlugin):
     def __init__(self, servername):
         self.servername = servername
-        self.disassembly_target_candidates_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'disassembly_target_candidates')
-        self.disassembly_symbol_candidates_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'disassembly_symbol_candidates')
 
     def startup_callback(self, success, payload, startup_payload):
         Utils.call_vim_remote_function(self.servername, "cxxd#services#disassembly#start_callback(" + str(int(success)) + ")")
@@ -35,11 +31,12 @@ class VimDisassembly(ServicePlugin):
 
     def _list_targets(self, success, payload, args):
         target_candidates = args
-        with open(self.disassembly_target_candidates_output, 'w') as f:
-            f.writelines(', '.join(str("'" + item.strip() + "'") for item in target_candidates))
+        # Stream candidates directly as JSON list
+        # Note: We strip whitespace (newlines) from the raw backend candidates
+        json_targets = json.dumps([item.strip() for item in target_candidates])
         Utils.call_vim_remote_function(
             self.servername,
-            "cxxd#services#disassembly#pick_target_callback(" + str(int(success)) + ", '" + str(self.disassembly_target_candidates_output) + "', " + str(len(target_candidates)) + ")"
+            "cxxd#services#disassembly#pick_target_callback(" + str(int(success)) + ", " + json_targets + ")"
         )
 
     def _list_symbol_candidates(self, success, payload, args):
@@ -51,12 +48,11 @@ class VimDisassembly(ServicePlugin):
                 symbol.location
 
         symbol_candidates = args
-        with open(self.disassembly_symbol_candidates_output, 'w') as f:
-            #f.write(json.dumps([make_popup_item(item) for item in symbol_candidates]))
-            f.writelines(', '.join(str("'" + make_popup_item(item) + "'") for item in symbol_candidates))
+        symbol_candidates = args
+        json_symbols = json.dumps([make_popup_item(item) for item in symbol_candidates])
         Utils.call_vim_remote_function(
             self.servername,
-            "cxxd#services#disassembly#pick_symbol_callback(" + str(int(success)) + ", '" + str(self.disassembly_symbol_candidates_output) + "', " + str(len(symbol_candidates)) + ")"
+            "cxxd#services#disassembly#pick_symbol_callback(" + str(int(success)) + ", " + json_symbols + ")"
         )
 
     def _disassemble(self, success, payload, args):

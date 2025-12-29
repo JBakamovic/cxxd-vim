@@ -87,59 +87,29 @@ function! cxxd#services#disassembly#pick_target()
 endfunction
 
 " ... (Callbacks use python for popup which is finesish if safe, but ideally migrate too. I will leave popup logic for now as it's UI, not Server comms)
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Function:     cxxd#services#disassembly#pick_target_callback()
-" Description:  Popup with disassembly targets.
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#disassembly#pick_target_callback(status, candidates_file, count)
-    if a:status == v:true
-        if a:count > 0
-            let l:content = readfile(a:candidates_file)
-            if len(l:content) > 0
-                " content is a single line string: 'target1', 'target2', ...
-                let l:targets = eval('[' . l:content[0] . ']')
-                let s:target_candidates = l:targets
-                call popup_menu(l:targets, #{
-                \ callback: 'cxxd#services#disassembly#pick_target_handler',
-                \ title: ' Select Disassembly Target ',
-                \ border: [],
-                \ padding: [1,1,1,1],
-                \})
-            endif
-        else
-            echohl WarningMsg | echomsg 'No disassembly targets found.' | echohl None
-        endif
-    else
-        echohl WarningMsg | echomsg 'Something went wrong with disassembly service (pick-target). See Cxxd server log for more details!' | echohl None
-    endif
-endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#services#disassembly#pick_target_callback()
 " Description:  Popup with disassembly targets.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#disassembly#pick_target_callback(status, candidates_file, count)
+function! cxxd#services#disassembly#pick_target_callback(status, targets)
     if a:status == v:true
-        if a:count > 0
-            let l:content = readfile(a:candidates_file)
-            if len(l:content) > 0
-                " content is a single line string: 'target1', 'target2', ...
-                let l:targets = eval('[' . l:content[0] . ']')
-                let s:target_candidates = l:targets
-                let l:min_popup_height = a:count > 10 ? 10 : a:count
-                call popup_menu(l:targets, #{
-                \ callback: 'cxxd#services#disassembly#pick_target_handler',
-                \ title: ' Select Disassembly Target ',
-                \ highlight: 'Question',
-                \ filter: 's:popup_filter',
-                \ border: [],
-                \ padding: [1,1,1,1],
-                \ minheight: l:min_popup_height,
-                \ maxheight: 40,
-                \ minwidth: 120,
-                \ maxwidth: 120
-                \})
-            endif
+        let s:target_candidates = a:targets
+        let l:count = len(s:target_candidates)
+        if l:count > 0
+            let l:min_popup_height = l:count > 10 ? 10 : l:count
+            call popup_menu(s:target_candidates, #{
+            \ callback: 'cxxd#services#disassembly#pick_target_handler',
+            \ title: ' Select Disassembly Target ',
+            \ highlight: 'Question',
+            \ filter: 's:popup_filter',
+            \ border: [],
+            \ padding: [1,1,1,1],
+            \ minheight: l:min_popup_height,
+            \ maxheight: 40,
+            \ minwidth: 120,
+            \ maxwidth: 120
+            \})
         else
             echohl WarningMsg | echomsg 'No disassembly targets found.' | echohl None
         endif
@@ -178,28 +148,24 @@ endfunction
 " Function:     cxxd#services#disassembly#pick_symbol_callback()
 " Description:  Popup with disassembly symbols.
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! cxxd#services#disassembly#pick_symbol_callback(status, candidates_file, count)
-    echomsg 'Is this even called? ' . a:status . ' ' . a:candidates_file . ' ' . a:count
+function! cxxd#services#disassembly#pick_symbol_callback(status, symbols)
     if a:status == v:true
-        if a:count > 0
-            let l:content = readfile(a:candidates_file)
-            if len(l:content) > 0
-                let l:symbols = eval('[' . l:content[0] . ']')
-                let s:symbol_candidates = l:symbols
-                let l:min_popup_height = a:count > 10 ? 10 : a:count
-                call popup_menu(l:symbols, #{
-                \ callback: 'cxxd#services#disassembly#pick_symbol_handler',
-                \ title: ' Select Symbol to Disassemble ',
-                \ highlight: 'Question',
-                \ filter: 's:popup_filter',
-                \ minheight: l:min_popup_height,
-                \ maxheight: 40,
-                \ minwidth: 120,
-                \ maxwidth: 120,
-                \ border: [],
-                \ padding: [1,1,1,1]
-                \})
-            endif
+        let s:symbol_candidates = a:symbols
+        let l:count = len(s:symbol_candidates)
+        if l:count > 0
+            let l:min_popup_height = l:count > 10 ? 10 : l:count
+            call popup_menu(s:symbol_candidates, #{
+            \ callback: 'cxxd#services#disassembly#pick_symbol_handler',
+            \ title: ' Select Symbol to Disassemble ',
+            \ highlight: 'Question',
+            \ filter: 's:popup_filter',
+            \ minheight: l:min_popup_height,
+            \ maxheight: 40,
+            \ minwidth: 120,
+            \ maxwidth: 120,
+            \ border: [],
+            \ padding: [1,1,1,1]
+            \})
         else
             echohl WarningMsg | echomsg 'No symbols found for selected target. Symbol is most likely inlined or not visible from current translation unit. Try with another one!' | echohl None
         endif
