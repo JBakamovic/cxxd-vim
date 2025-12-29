@@ -127,7 +127,7 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#utils#last_occurence_of_non_identifier(str)
     let l:idx = -1
-python << EOF
+python3 << EOF
 import vim
 def is_identifier(char):
     is_digit = char.isdigit()

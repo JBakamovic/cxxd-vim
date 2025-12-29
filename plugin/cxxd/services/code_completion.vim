@@ -62,23 +62,7 @@ function! cxxd#services#code_completion#run_callback(status, code_completion_can
             else
                 let l:start_completion_col = col('.') - l:idx
             endif
-python3 << EOF
-import vim
-import json
-try:
-    candidates_file = vim.eval('a:code_completion_candidates')
-    start_col = vim.eval('l:start_completion_col')
-    with open(candidates_file, 'r') as f:
-        # Use vim.command to call complete function
-        # The file content should be a JSON list of dicts or strings suitable for complete()
-        # The legacy code did: vim.eval("complete(..., [" + f.read() + "])")
-        # We can do the same.
-        content = f.read()
-        vim.command("call complete(" + start_col + ", [" + content + "])")
-except Exception as e:
-    # Just swallow or print error, don't crash Vim
-    print(f"Error in completion callback: {e}")
-EOF
+            call complete(l:start_completion_col, a:code_completion_candidates)
         else
             call complete(col('.'), [])
         endif

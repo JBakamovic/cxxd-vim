@@ -1,6 +1,4 @@
 import logging
-import os
-import tempfile
 from utils import Utils
 from cxxd.parser.ast_node_identifier import ASTNodeId
 from cxxd.parser.clang_parser import ClangParser
@@ -10,7 +8,6 @@ from cxxd.services.code_completion.code_completion import CodeCompletionRequestI
 class VimCodeCompletion(ServicePlugin):
     def __init__(self, servername):
         self.servername = servername
-        self.code_complete_candidates_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'code_complete_candidates')
 
     def _create_vim_complete_item(self, candidate, detailed_candidate, kind, result_type, extra_documentation = None):
         return {
@@ -114,10 +111,11 @@ class VimCodeCompletion(ServicePlugin):
         def call_vim_rpc(status, completion_candidates, length):
             Utils.call_vim_remote_function(
                 self.servername,
-                "cxxd#services#code_completion#run_callback(" + str(int(status)) + ", '" + str(completion_candidates) + "', " + str(length) + ")"
+                "cxxd#services#code_completion#run_callback(" + str(int(status)) + ", " + str(completion_candidates) + ", " + str(length) + ")"
             )
 
         if success:
+            import json
             candidate_list = []
             for result in code_completion_results:
                 kind = self._ast_node_id_to_vim_complete_item_kind(ClangParser.to_ast_node_id(result.kind))
@@ -135,10 +133,8 @@ class VimCodeCompletion(ServicePlugin):
                 else:
                     logging.error('Cannot handle following cursor kind: {0}'.format(result.kind))
 
-            with open(self.code_complete_candidates_output, 'w') as f:
-                f.writelines(', '.join(str(item) for item in candidate_list))
-
-            call_vim_rpc(success, self.code_complete_candidates_output, len(candidate_list))
+            json_candidates = json.dumps(candidate_list)
+            call_vim_rpc(success, json_candidates, len(candidate_list))
             logging.info('Found {0} candidates.'.format(len(candidate_list)))
         else:
-            call_vim_rpc(success, [], 0)
+            call_vim_rpc(success, "[]", 0)

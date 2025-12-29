@@ -36,8 +36,7 @@ class Utils():
                 pass # logging might not be safe/available here
             return
 
-        cmd = 'gvim --servername ' + vim_instance + ' --remote-expr "' + function + '"'
-        return call(shlex.split(cmd))
+        return call(['gvim', '--servername', vim_instance, '--remote-expr', function])
 
     @staticmethod
     def is_port_available(port):
