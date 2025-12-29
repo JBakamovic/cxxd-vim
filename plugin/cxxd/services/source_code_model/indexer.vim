@@ -149,18 +149,7 @@ endfunction
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#services#source_code_model#indexer#find_all_references_callback(status, references)
     if a:status == v:true
-python3 << EOF
-import vim
-import json
-try:
-    references_file = vim.eval('a:references')
-    with open(references_file, 'r') as f:
-        # Assuming references is a path to a file containing JSON or Python list string
-        content = f.read()
-        vim.command("call setqflist([" + content + "], 'r')")
-except Exception as e:
-    print(f"Error in find_all_references callback: {e}")
-EOF
+        call setqflist(a:references, 'r')
         execute('copen')
         redraw
     else

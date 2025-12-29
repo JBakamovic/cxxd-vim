@@ -1,13 +1,13 @@
 import logging
 import os
 import tempfile
+import json
 from cxxd.services.source_code_model.indexer.clang_indexer import SourceCodeModelIndexerRequestId
 from utils import Utils
 
 class VimIndexer:
     def __init__(self, servername):
         self.servername = servername
-        self.find_all_references_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'find_all_references')
         self.fetch_all_diagnostics_output = os.path.join(tempfile.gettempdir(), str(self.servername) + 'fetch_all_diagnostics')
         self.op = {
             SourceCodeModelIndexerRequestId.RUN_ON_SINGLE_FILE    : self.__run_on_single_file,
@@ -51,20 +51,20 @@ class VimIndexer:
         quickfix_list = []
         for ref in references:
             filename, line, column, context = ref
-            quickfix_list.append(
-                "{'filename': '" + filename + "', " +
-                "'lnum': '" + str(line) + "', " +
-                "'col': '" + str(column) + "', " +
-                "'type': 'I', " +
-                "'text': '" + context.replace("'", r"''").rstrip() + "'}"
-            )
+            # Construct dictionary for JSON serialization
+            quickfix_list.append({
+                'filename': filename,
+                'lnum': line,
+                'col': column,
+                'type': 'I',
+                'text': context.rstrip()
+            })
 
-        with open(self.find_all_references_output, 'w') as f:
-            f.writelines(', '.join(item for item in quickfix_list))
+        json_references = json.dumps(quickfix_list)
 
         Utils.call_vim_remote_function(
             self.servername,
-            "cxxd#services#source_code_model#indexer#find_all_references_callback(" + str(int(success)) + ", '" + self.find_all_references_output + "')"
+            "cxxd#services#source_code_model#indexer#find_all_references_callback(" + str(int(success)) + ", " + json_references + ")"
         )
         logging.debug("References: " + str(quickfix_list))
 
