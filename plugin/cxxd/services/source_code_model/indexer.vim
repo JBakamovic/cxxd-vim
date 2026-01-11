@@ -173,3 +173,78 @@ endfunction
 
 
 
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#indexer#fetch_all_definitions()
+" Description:  Fetches all default definitions.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#services#source_code_model#indexer#fetch_all_definitions()
+    if g:cxxd_src_code_model['started'] && g:cxxd_src_code_model['services']['indexer']['enabled']
+        let l:service_payload = [0x0, 0x12]
+        let l:req = {'header': 0xF2, 'service_id': 0x0, 'payload': l:service_payload}
+        call cxxd#server#send_request(l:req)
+    endif
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#services#source_code_model#indexer#fetch_all_definitions_callback()
+" Description:  Definitions fetched.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#services#source_code_model#indexer#fetch_all_definitions_callback(status, definitions_file)
+    if a:status == v:true
+        if exists('*fzf#run')
+            " Use fzf if available - stream directly from file for performance
+            let l:range_calc = 'dim=${FZF_PREVIEW_LINES:-20}; start=$(($line - $dim/2)); [ $start -lt 1 ] && start=1; end=$(($line + $dim/2))'
+            if executable('bat')
+                let l:preview_cmd = 'file=$(echo {2} | cut -d: -f1); line=$(echo {2} | cut -d: -f2); '.l:range_calc.'; bat --language cpp --line-range $start:$end --style=numbers --color=always --highlight-line $line $file'
+            elseif executable('batcat')
+                let l:preview_cmd = 'file=$(echo {2} | cut -d: -f1); line=$(echo {2} | cut -d: -f2); '.l:range_calc.'; batcat --language cpp --line-range $start:$end --style=numbers --color=always --highlight-line $line $file'
+            elseif executable('highlight')
+                let l:preview_cmd = 'file=$(echo {2} | cut -d: -f1); line=$(echo {2} | cut -d: -f2); '.l:range_calc.'; cat $file | sed -n "$start,$end p" | highlight -O ansi --syntax cpp --force'
+            else
+                let l:preview_cmd = 'file=$(echo {2} | cut -d: -f1); line=$(echo {2} | cut -d: -f2); '.l:range_calc.'; cat $file | sed -n "$start,$end p"'
+            endif
+            call fzf#run(fzf#wrap({
+            \ 'source': 'cat ' . a:definitions_file,
+            \ 'sink': function('cxxd#services#source_code_model#indexer#fzf_sink'),
+            \ 'options': ['--delimiter', '\t', '--preview', l:preview_cmd, '--preview-window', 'right:50%', '--ansi'],
+            \ }))
+        else
+            " Fallback to quickfix - read file and parse
+python3 << EOF
+import json
+import vim
+defs = []
+with open(vim.eval('a:definitions_file'), 'r') as f:
+    # Format: context \t filename:line:column
+    for line in f:
+        parts = line.strip().split('\t')
+        context = parts[0]
+        loc_parts = parts[1].split(':')
+        filename = loc_parts[0])
+        lnum = loc_parts[1]
+        col = loc_parts[2]
+        defs.append({'filename': filename, 'lnum': lnum, 'col': col, 'text': context})
+vim.command("let l:qflist = " + json.dumps(defs))
+EOF
+            call setqflist(l:qflist, 'r')
+            execute('copen')
+            redraw
+        endif
+    else
+        echohl WarningMsg | echomsg 'Something went wrong with source-code-model (indexer-fetch-all-definitions) service. See Cxxd server log for more details!' | echohl None
+    endif
+endfunction
+
+function! cxxd#services#source_code_model#indexer#fzf_sink(line)
+    " Line format: context \t filename:line:column
+    let l:parts = split(a:line, '\t')
+    if len(l:parts) >= 2
+        let l:location = split(l:parts[1], ':')
+        let l:filename = l:location[0]
+        let l:lineno = l:location[1]
+        execute 'e ' . l:filename
+        execute l:lineno
+        normal! zz
+    endif
+endfunction

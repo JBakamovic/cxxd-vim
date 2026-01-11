@@ -187,6 +187,7 @@ augroup END
 :command                        CxxdFetchAllDiagnosticsBySeverityAsc  :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_asc'])
 :command                        CxxdFetchAllDiagnosticsBySeverityDesc :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc'])
 :command                        CxxdFetchAllDiagnosticsByAlphabet     :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['filename'])
+:command                        CxxdGoToSymbol                        :call cxxd#services#source_code_model#indexer#fetch_all_definitions()
 :command                        CxxdRebuildIndex                      :call cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
 :command                        CxxdCodeCompletion                    :call cxxd#services#code_completion#run_i(expand('%:p'), line('.'), col('.'))
 :command                        CxxdAnalyzerClangTidyBuf              :call cxxd#services#clang_tidy#run(expand('%:p'), v:false)
@@ -207,6 +208,8 @@ nmap <unique>       <S-F3>     :vsp <CR>:CxxdGoToInclude<CR>                    
 imap <unique>       <S-F3>     <ESC>:vsp <CR>:CxxdGoToInclude<CR>i
 nmap <unique>       <C-F3>     :sp <CR>:CxxdGoToInclude<CR>                     | " Open file (header-include) under the cursor in a horizontal split
 imap <unique>       <C-F3>     <ESC>:sp <CR>:CxxdGoToInclude<CR>i
+nmap <unique>       <F10>      :CxxdGoToSymbol<CR>                              | " Go to symbols
+imap <unique>       <F10>      <ESC>:CxxdGoToSymbol<CR>i
 nmap <unique>       <F12>      :CxxdGoToDefinition<CR>                          | " Jump to symbol definition
 imap <unique>       <F12>      <ESC>:CxxdGoToDefinition<CR>i
 nmap <unique>       <S-F12>    :vsp <CR>:CxxdGoToDefinition<CR>                 | " Jump to symbol definition in a vertical split
