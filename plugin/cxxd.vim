@@ -178,6 +178,7 @@ augroup END
 :command                        CxxdFetchAllDiagnosticsBySeverityAsc  :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_asc'])
 :command                        CxxdFetchAllDiagnosticsBySeverityDesc :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['severity_desc'])
 :command                        CxxdFetchAllDiagnosticsByAlphabet     :call cxxd#services#source_code_model#indexer#fetch_all_diagnostics(g:cxxd_fetch_all_diagnostics_sorting_strategies['filename'])
+:command                        CxxdGoToSymbol                        :call cxxd#services#source_code_model#indexer#fetch_all_definitions()
 :command                        CxxdRebuildIndex                      :call cxxd#services#source_code_model#indexer#drop_all_and_run_on_directory()
 :command                        CxxdCodeCompletion                    :call cxxd#services#code_completion#run_i(expand('%:p'), line('.'), col('.'))
 :command                        CxxdAnalyzerClangTidyBuf              :call cxxd#services#clang_tidy#run(expand('%:p'), v:false)

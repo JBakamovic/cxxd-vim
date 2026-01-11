@@ -14,7 +14,9 @@ class VimIndexer:
             SourceCodeModelIndexerRequestId.DROP_SINGLE_FILE      : self.__drop_single_file,
             SourceCodeModelIndexerRequestId.DROP_ALL              : self.__drop_all,
             SourceCodeModelIndexerRequestId.FIND_ALL_REFERENCES   : self.__find_all_references,
+
             SourceCodeModelIndexerRequestId.FETCH_ALL_DIAGNOSTICS : self.__fetch_all_diagnostics,
+            SourceCodeModelIndexerRequestId.FETCH_ALL_DEFINITIONS : self.__fetch_all_definitions,
         }
 
     def __call__(self, success, payload, args):
@@ -100,3 +102,19 @@ class VimIndexer:
             "cxxd#services#source_code_model#indexer#fetch_all_diagnostics_callback(" + str(int(success)) + ", " + json_diagnostics + ")"
         )
         logging.debug("Diagnostics: " + str(quickfix_list))
+
+    def __fetch_all_definitions(self, success, args):
+        # args is [output_file_path]
+        if args and len(args) > 0:
+            output_file_path = args[0]
+            Utils.call_vim_remote_function(
+                "cxxd#services#source_code_model#indexer#fetch_all_definitions_callback(" + str(int(success)) + ", '" + output_file_path + "')"
+            )
+            logging.debug("Definitions streamed to: " + output_file_path)
+        else:
+            logging.error("Fetch all definitions failed or returned no path")
+            Utils.call_vim_remote_function(
+                "cxxd#services#source_code_model#indexer#fetch_all_definitions_callback(" + str(int(False)) + ", '')"
+            )
+
+
