@@ -192,8 +192,7 @@ augroup END
 :command                        CxxdCodeCompletion                    :call cxxd#services#code_completion#run_i(expand('%:p'), line('.'), col('.'))
 :command                        CxxdAnalyzerClangTidyBuf              :call cxxd#services#clang_tidy#run(expand('%:p'), v:false)
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
-:command                        CxxdBuildRun                          :call cxxd#services#project_builder#run_target()
-:command -nargs=+               CxxdBuildRunWithParams                :call cxxd#services#project_builder#run_custom(<f-args>)
+:command                        CxxdBuildPickTarget                   :call cxxd#services#project_builder#pick_target()
 :command                        CxxdDisassemblyPickTarget             :call cxxd#services#disassembly#pick_target()
 :command                        CxxdDisassemblyPickSymbol             :call cxxd#services#disassembly#pick_symbol(expand('%p'), line('.'), col('.'))
 :command                        CxxdDebugLogs                         :call cxxd#server#debug_logs()
@@ -231,12 +230,12 @@ nmap <unique>       <F5>       :CxxdAnalyzerClangTidyBuf<CR>                    
 imap <unique>       <F5>       <ESC>:CxxdAnalyzerClangTidyBuf<CR>i
 nmap <unique>       <S-F5>     :CxxdAnalyzerClangTidyApplyFixesBuf<CR>          | " Run clang-tidy over current buffer (apply fixes)
 imap <unique>       <S-F5>     <ESC>:CxxdAnalyzerClangTidyApplyFixesBuf<CR>i
-nmap <unique>       <F9>       :CxxdBuildRun<CR>                                | " Build project by auto-detecting build command provided by cxxd config file
-imap <unique>       <F9>       <ESC>:CxxdBuildRun<CR>i
 nmap <unique>       <F8>       :CxxdDebugLogs<CR>                               | " Open cxxd diagnostics log
 imap <unique>       <F8>       <ESC>:CxxdDebugLogs<CR>i
 nmap <unique>       <S-F8>     :CxxdSetLogLevel DEBUG<CR>                       | " Increase verbosity of cxxd diagnostics log (set to DEBUG)
 imap <unique>       <S-F8>     <ESC>:CxxdSetLogLevel DEBUG<CR>i
+nmap <unique>       <F9>       :CxxdBuildPickTarget<CR>                         | " Run the build by picking the target
+imap <unique>       <F9>       <ESC>:CxxdBuildPickTarget<CR>i
 
 "
 " Important to be set to a much lower value than a default one (=4000) because some
