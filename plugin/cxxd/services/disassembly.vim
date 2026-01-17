@@ -75,19 +75,27 @@ function! cxxd#services#disassembly#pick_target_callback(status, targets)
         let s:target_candidates = a:targets
         let l:count = len(s:target_candidates)
         if l:count > 0
-            let l:min_popup_height = l:count > 10 ? 10 : l:count
-            call popup_menu(s:target_candidates, #{
-            \ callback: 'cxxd#services#disassembly#pick_target_handler',
-            \ title: ' Select Disassembly Target ',
-            \ highlight: 'Question',
-            \ filter: 's:popup_filter',
-            \ border: [],
-            \ padding: [1,1,1,1],
-            \ minheight: l:min_popup_height,
-            \ maxheight: 40,
-            \ minwidth: 120,
-            \ maxwidth: 120
-            \})
+            if exists('*fzf#run')
+                call fzf#run(fzf#wrap({
+                            \ 'source': s:target_candidates,
+                            \ 'sink': function('cxxd#services#disassembly#fzf_pick_target_handler'),
+                            \ 'options': '--prompt "Disassembly Target> "'
+                            \ }))
+            else
+                let l:min_popup_height = l:count > 10 ? 10 : l:count
+                call popup_menu(s:target_candidates, #{
+                \ callback: 'cxxd#services#disassembly#pick_target_handler',
+                \ title: ' Select Disassembly Target ',
+                \ highlight: 'Question',
+                \ filter: 's:popup_filter',
+                \ border: [],
+                \ padding: [1,1,1,1],
+                \ minheight: l:min_popup_height,
+                \ maxheight: 40,
+                \ minwidth: 120,
+                \ maxwidth: 120
+                \})
+            endif
         else
             echohl WarningMsg | echomsg 'No disassembly targets found.' | echohl None
         endif
@@ -102,6 +110,11 @@ function! cxxd#services#disassembly#pick_target_handler(id, result)
         let s:target_selected = s:target_candidates[s:target_selected_idx]
         echomsg 'Selected target: ' . s:target_selected
     endif
+endfunction
+
+function! cxxd#services#disassembly#fzf_pick_target_handler(target)
+    let s:target_selected = a:target
+    echomsg 'Selected target: ' . s:target_selected
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -127,19 +140,27 @@ function! cxxd#services#disassembly#pick_symbol_callback(status, symbols)
         let s:symbol_candidates = a:symbols
         let l:count = len(s:symbol_candidates)
         if l:count > 0
-            let l:min_popup_height = l:count > 10 ? 10 : l:count
-            call popup_menu(s:symbol_candidates, #{
-            \ callback: 'cxxd#services#disassembly#pick_symbol_handler',
-            \ title: ' Select Symbol to Disassemble ',
-            \ highlight: 'Question',
-            \ filter: 's:popup_filter',
-            \ minheight: l:min_popup_height,
-            \ maxheight: 40,
-            \ minwidth: 120,
-            \ maxwidth: 120,
-            \ border: [],
-            \ padding: [1,1,1,1]
-            \})
+            if exists('*fzf#run')
+                call fzf#run(fzf#wrap({
+                            \ 'source': s:symbol_candidates,
+                            \ 'sink': function('cxxd#services#disassembly#fzf_pick_symbol_handler'),
+                            \ 'options': '--prompt "Symbol> "'
+                            \ }))
+            else
+                let l:min_popup_height = l:count > 10 ? 10 : l:count
+                call popup_menu(s:symbol_candidates, #{
+                \ callback: 'cxxd#services#disassembly#pick_symbol_handler',
+                \ title: ' Select Symbol to Disassemble ',
+                \ highlight: 'Question',
+                \ filter: 's:popup_filter',
+                \ minheight: l:min_popup_height,
+                \ maxheight: 40,
+                \ minwidth: 120,
+                \ maxwidth: 120,
+                \ border: [],
+                \ padding: [1,1,1,1]
+                \})
+            endif
         else
             echohl WarningMsg | echomsg 'No symbols found for selected target. Symbol is most likely inlined or not visible from current translation unit. Try with another one!' | echohl None
         endif
@@ -153,6 +174,16 @@ function! cxxd#services#disassembly#pick_symbol_handler(id, result)
         let s:symbol_selected_idx = a:result - 1
         echomsg 'Selected symbol index: ' . s:symbol_selected_idx
         call cxxd#services#disassembly#run()
+    endif
+endfunction
+
+function! cxxd#services#disassembly#fzf_pick_symbol_handler(symbol)
+    let s:symbol_selected_idx = index(s:symbol_candidates, a:symbol)
+    if s:symbol_selected_idx != -1
+         echomsg 'Selected symbol index: ' . s:symbol_selected_idx
+         call cxxd#services#disassembly#run()
+    else
+         echohl ErrorMsg | echomsg 'Could not find selected symbol in candidates list.' | echohl None
     endif
 endfunction
 
