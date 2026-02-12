@@ -196,6 +196,8 @@ augroup END
 :command -nargs=+               CxxdBuildRunWithParams                :call cxxd#services#project_builder#run_custom(<f-args>)
 :command                        CxxdDisassemblyPickTarget             :call cxxd#services#disassembly#pick_target()
 :command                        CxxdDisassemblyPickSymbol             :call cxxd#services#disassembly#pick_symbol(expand('%p'), line('.'), col('.'))
+:command                        CxxdDebugLogs                         :call cxxd#server#debug_logs()
+:command -nargs=1               CxxdSetLogLevel                       :call cxxd#server#set_log_level(<f-args>)
 
 "
 " Cxxd default-provided key mappings
@@ -231,6 +233,10 @@ nmap <unique>       <S-F5>     :CxxdAnalyzerClangTidyApplyFixesBuf<CR>          
 imap <unique>       <S-F5>     <ESC>:CxxdAnalyzerClangTidyApplyFixesBuf<CR>i
 nmap <unique>       <F9>       :CxxdBuildRun<CR>                                | " Build project by auto-detecting build command provided by cxxd config file
 imap <unique>       <F9>       <ESC>:CxxdBuildRun<CR>i
+nmap <unique>       <F8>       :CxxdDebugLogs<CR>                               | " Open cxxd diagnostics log
+imap <unique>       <F8>       <ESC>:CxxdDebugLogs<CR>i
+nmap <unique>       <S-F8>     :CxxdSetLogLevel DEBUG<CR>                       | " Increase verbosity of cxxd diagnostics log (set to DEBUG)
+imap <unique>       <S-F8>     <ESC>:CxxdSetLogLevel DEBUG<CR>i
 
 "
 " Important to be set to a much lower value than a default one (=4000) because some

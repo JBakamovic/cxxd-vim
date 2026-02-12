@@ -3,6 +3,7 @@
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:cxxd_job_id = 0
 let s:cxxd_server_vim_path = expand('<sfile>:p')
+let s:cxxd_log_file = ''
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Function:     cxxd#server#start()
@@ -22,6 +23,7 @@ function! cxxd#server#start(project_root_directory, ...)
 
     " Log file path
     let l:log_file = tempname() . '_cxxd_server.log'
+    let s:cxxd_log_file = l:log_file
 
     let l:cmd = ['python3', l:script_path, '--project-root', l:project_root_directory_full_path, '--log-file', l:log_file]
     if l:target_configuration != ''
@@ -145,3 +147,31 @@ function! cxxd#server#balloonexpr()
         return cxxd#services#source_code_model#type_deduction#run()
     endif
 endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#server#set_log_level(level)
+" Description:  Sets the log level of the backend server dynamically.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#server#set_log_level(level)
+    let l:req = {'header': 0xFC, 'service_id': 0, 'payload': a:level}
+    call cxxd#server#send_request(l:req)
+endfunction
+
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function:     cxxd#server#debug_logs()
+" Description:  Opens a terminal window tailing the current log file.
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! cxxd#server#debug_logs()
+    if s:cxxd_log_file == ''
+        echohl WarningMsg | echo "Cxxd server not started or log file not available." | echohl None
+        return
+    endif
+
+    let l:height = float2nr(&lines * 0.3)
+    if has('nvim')
+        execute 'topleft ' . l:height . 'split | terminal tail -f ' . s:cxxd_log_file
+    else
+        execute 'topleft terminal ++rows=' . l:height . ' tail -f ' . s:cxxd_log_file
+    endif
+endfunction
+
