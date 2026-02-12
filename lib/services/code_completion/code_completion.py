@@ -116,7 +116,7 @@ class VimCodeCompletion(ServicePlugin):
 
         if success:
             candidate_list = []
-            for result in code_completion_results:
+            for typed_text, result in code_completion_results:
                 kind = self._ast_node_id_to_vim_complete_item_kind(ClangParser.to_ast_node_id(result.kind))
                 if kind != '':
                     result_type, candidate, params = self._extract_chunks(result.string)
