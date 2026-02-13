@@ -55,7 +55,7 @@ endfunction
 " Description:  Called when job exits (NEOVIM).
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#job#exit_handler(job_id, data, event)
-    echohl ErrorMsg | echom "cxxd server exited (Neovim)" | echohl None
+    "echohl ErrorMsg | echom "cxxd server exited (Neovim)" | echohl None
 endfunction
 
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -64,7 +64,7 @@ endfunction
 "               Signature: func(job, status)
 " """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! cxxd#job#vim8_exit_handler(job, status)
-     echohl ErrorMsg | echom "cxxd server exited (Vim 8)" | echohl None
+     "echohl ErrorMsg | echom "cxxd server exited (Vim 8)" | echohl None
 endfunction
 
 function! s:process_message(json_str)

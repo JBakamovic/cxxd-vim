@@ -194,7 +194,7 @@ augroup END
 :command                        CxxdAnalyzerClangTidyApplyFixesBuf    :call cxxd#services#clang_tidy#run(expand('%:p'), v:true)
 :command                        CxxdBuildPickTarget                   :call cxxd#services#project_builder#pick_target()
 :command                        CxxdDisassemblyPickTarget             :call cxxd#services#disassembly#pick_target()
-:command                        CxxdDisassemblyPickSymbol             :call cxxd#services#disassembly#pick_symbol(expand('%p'), line('.'), col('.'))
+:command                        CxxdDisassemblyPickSymbol             :call cxxd#services#disassembly#pick_symbol(expand('%:p'), line('.'), col('.'))
 :command                        CxxdDebugLogs                         :call cxxd#server#debug_logs()
 :command -nargs=1               CxxdSetLogLevel                       :call cxxd#server#set_log_level(<f-args>)
 
